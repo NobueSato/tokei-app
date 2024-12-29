@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -15,201 +15,164 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: ClockScreen(),
+      home: const ClockScreen(),
     );
   }
 }
 
 class ClockScreen extends StatefulWidget {
-  ClockScreen({Key? key}) : super(key: key); // Add the named key parameter
+  const ClockScreen({Key? key}) : super(key: key);
 
   @override
   _ClockScreenState createState() => _ClockScreenState();
 }
 
 class _ClockScreenState extends State<ClockScreen> {
-  String _timeFormat = '12h'; // Default 12-hour format
-  String _clockText = '';
   late Timer _timer;
+  String _time = '';
+  bool _is24HourFormat = true; // Default to 24-hour format
 
   @override
   void initState() {
     super.initState();
-    _updateTime();
+    _updateTime(); // Update immediately on start
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      _updateTime(); // Update every second
+    });
   }
 
   @override
   void dispose() {
-    _timer.cancel();
+    _timer.cancel(); // Cancel the timer when the widget is disposed
     super.dispose();
   }
 
   void _updateTime() {
-    _timer = Timer.periodic(Duration(seconds: 1), (Timer t) {
-      setState(() {
-        if (_timeFormat == '12h') {
-          _clockText = _get12HourTime();
-        } else if (_timeFormat == '24h') {
-          _clockText = _get24HourTime();
-        } else if (_timeFormat == 'Date') {
-          _clockText = _getDate();
-        } else if (_timeFormat == 'Flip') {
-          _clockText = _getFlipClockTime();
-        } else {
-          _clockText = _get12HourTime();
-        }
-      });
+    final DateTime now = DateTime.now();
+    setState(() {
+      // Check format: 24-hour or 12-hour
+      if (_is24HourFormat) {
+        _time = "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}";
+      } else {
+        _time = "${_formatTime(now.hour)}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')} ${_formatAMPM(now.hour)}";
+      }
     });
   }
 
-  String _get12HourTime() {
-    final now = DateTime.now();
-    final hour = now.hour % 12;
-    final minute = now.minute;
-    final second = now.second;
-    final ampm = now.hour >= 12 ? 'PM' : 'AM';
-    return '$hour:${minute.toString().padLeft(2, '0')}:${second.toString().padLeft(2, '0')} $ampm';
+  String _formatTime(int hour) {
+    return hour % 12 == 0 ? '12' : (hour % 12).toString().padLeft(2, '0');
   }
 
-  String _get24HourTime() {
-    final now = DateTime.now();
-    final hour = now.hour;
-    final minute = now.minute;
-    final second = now.second;
-    return '$hour:${minute.toString().padLeft(2, '0')}:${second.toString().padLeft(2, '0')}';
-  }
-
-  String _getDate() {
-    final now = DateTime.now();
-    final year = now.year;
-    final month = now.month;
-    final day = now.day;
-    final weekday = now.weekday;
-    final daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return '$year-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}-${daysOfWeek[weekday - 1]}';
-  }
-
-  String _getFlipClockTime() {
-    final now = DateTime.now();
-    final hour = now.hour.toString().padLeft(2, '0');
-    final minute = now.minute.toString().padLeft(2, '0');
-    final second = now.second.toString().padLeft(2, '0');
-    return '$hour:$minute:$second';
+  String _formatAMPM(int hour) {
+    return hour >= 12 ? 'PM' : 'AM';
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFEEEEEE), // Background color
       appBar: AppBar(
-        title: Text('Tokei App'),
-        backgroundColor: Colors.blue,
+        title: const Text('Tokei App'),
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Display clock in the middle of the screen
-          Text(
-            _clockText,
-            style: TextStyle(
-              fontSize: 50,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
+        children: <Widget>[
+          Center(
+            child: Text(
+              _time, // Display the current time
+              style: const TextStyle(
+                fontSize: 48,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
-          SizedBox(height: 20),
-          // Row with buttons at the bottom
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _timeFormat = '12h';
-                    });
-                  },
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all<Color>(Colors.white),
-                    side: MaterialStateProperty.all(BorderSide(color: Colors.black)),
-                  ),
-                  child: Text(
-                    '12h',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _timeFormat = '24h';
-                    });
-                  },
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all<Color>(Colors.white),
-                    side: MaterialStateProperty.all(BorderSide(color: Colors.black)),
-                  ),
-                  child: Text(
-                    '24h',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _timeFormat = 'Date';
-                    });
-                  },
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all<Color>(Colors.white),
-                    side: MaterialStateProperty.all(BorderSide(color: Colors.black)),
-                  ),
-                  child: Text(
-                    'Date',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _timeFormat = 'Normal';
-                    });
-                  },
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all<Color>(Colors.white),
-                    side: MaterialStateProperty.all(BorderSide(color: Colors.black)),
-                  ),
-                  child: Text(
-                    'Normal',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _timeFormat = 'Flip';
-                    });
-                  },
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all<Color>(Colors.white),
-                    side: MaterialStateProperty.all(BorderSide(color: Colors.black)),
-                  ),
-                  child: Text(
-                    'Flip',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ),
-              ),
-            ],
-          ),
         ],
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Wrap(
+          spacing: 8.0, // Space between buttons
+          runSpacing: 8.0, // Space between rows of buttons
+          alignment: WrapAlignment.center, // Center the buttons
+          children: <Widget>[
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  _is24HourFormat = false; // Switch to 12-hour format
+                });
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: !_is24HourFormat ? const Color(0xFFEEE8B6) : const Color(0xFFE5E5E5),
+                side: const BorderSide(color: Colors.black),
+              ),
+              child: const Text(
+                '12h',
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  _is24HourFormat = true; // Switch to 24-hour format
+                });
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _is24HourFormat ? const Color(0xFFEEE8B6) : const Color(0xFFE5E5E5),
+                side: const BorderSide(color: Colors.black),
+              ),
+              child: const Text(
+                '24h',
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  final now = DateTime.now();
+                  _time = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')} ${_formatAMPM(now.hour)}";
+                });
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFE5E5E5),
+                side: const BorderSide(color: Colors.black),
+              ),
+              child: const Text(
+                'Date',
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  // Reset to default normal time view
+                  _updateTime();
+                });
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFE5E5E5),
+                side: const BorderSide(color: Colors.black),
+              ),
+              child: const Text(
+                'Normal',
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  // Flip clock logic can be added here
+                });
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFE5E5E5),
+                side: const BorderSide(color: Colors.black),
+              ),
+              child: const Text(
+                'Flip',
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
