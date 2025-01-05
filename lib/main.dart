@@ -3,7 +3,7 @@ import 'package:flutter/rendering.dart'; // Correct import for debugPaintSizeEna
 import 'dart:async';
 
 void main() {
-  debugPaintSizeEnabled = true; // Enable debug layout painting
+  //debugPaintSizeEnabled = true; // Enable debug layout painting
   runApp(const MyApp());
 }
 
@@ -107,7 +107,8 @@ class _ClockScreenState extends State<ClockScreen> {
                       ),
                       // Blinking colon with fixed width and adjusted alignment
                       Container(
-                        width: 30, // Fixed width for the colon space
+                        width: MediaQuery.of(context).size.width *
+                            0.08, // Fixed width for the colon space. 8% of screen width
                         alignment: Alignment
                             .center, // Ensure the colon is centered vertically
                         child: Text(
@@ -142,7 +143,7 @@ class _ClockScreenState extends State<ClockScreen> {
                         ? Text(
                             _date,
                             style: const TextStyle(
-                              fontSize: 30,
+                              fontSize: 25,
                               fontWeight: FontWeight.w400,
                             ),
                             textAlign: TextAlign.center,
