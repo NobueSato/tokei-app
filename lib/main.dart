@@ -3,7 +3,7 @@ import 'package:flutter/rendering.dart'; // Correct import for debugPaintSizeEna
 import 'dart:async';
 
 void main() {
-  //debugPaintSizeEnabled = true; // Enable debug layout painting
+  debugPaintSizeEnabled = true; // Enable debug layout painting
   runApp(const MyApp());
 }
 
@@ -36,6 +36,8 @@ class _ClockScreenState extends State<ClockScreen> {
   String _minutes = '';
   bool _is24HourFormat = true; // Default to 24-hour format
   bool _isColonVisible = true; // Track if the colon is visible or not
+  bool _isDateView = false; // Track if the date is visible or not
+  String _date = ''; // Store the formatted date
 
   @override
   void initState() {
@@ -75,6 +77,13 @@ class _ClockScreenState extends State<ClockScreen> {
     return hour >= 12 ? 'PM' : 'AM';
   }
 
+  String _getFormattedDate() {
+    final DateTime now = DateTime.now();
+    final weekday =
+        ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][now.weekday - 1];
+    return '${now.year} - ${now.month.toString().padLeft(2, '0')} - ${now.day.toString().padLeft(2, '0')} $weekday';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -82,43 +91,63 @@ class _ClockScreenState extends State<ClockScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Center(
-              child: Row(
+              child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // Hour Text
-                  Text(
-                    _hours,
-                    style: const TextStyle(
-                      fontSize: 100,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  // Blinking colon with fixed width and adjusted alignment
-                  Container(
-                    width: 30, // Fixed width for the colon space
-                    alignment: Alignment
-                        .center, // Ensure the colon is centered vertically
-                    child: Text(
-                      _isColonVisible
-                          ? ':'
-                          : '', // Colon blinks by toggling visibility
-                      style: TextStyle(
-                        fontSize: 100,
-                        fontWeight: FontWeight.bold,
-                        color: _isColonVisible
-                            ? Colors.black
-                            : Colors
-                                .transparent, // Only color the colon when visible
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        _hours,
+                        style: const TextStyle(
+                          fontSize: 100,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
+                      // Blinking colon with fixed width and adjusted alignment
+                      Container(
+                        width: 30, // Fixed width for the colon space
+                        alignment: Alignment
+                            .center, // Ensure the colon is centered vertically
+                        child: Text(
+                          _isColonVisible
+                              ? ':'
+                              : '', // Colon blinks by toggling visibility
+                          style: TextStyle(
+                            fontSize: 100,
+                            fontWeight: FontWeight.bold,
+                            color: _isColonVisible
+                                ? Colors.black
+                                : Colors
+                                    .transparent, // Only color the colon when visible
+                          ),
+                        ),
+                      ),
+                      // Minute Text
+                      Text(
+                        _minutes,
+                        style: const TextStyle(
+                          fontSize: 100,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
-                  // Minute Text
-                  Text(
-                    _minutes,
-                    style: const TextStyle(
-                      fontSize: 100,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  Container(
+                    height: MediaQuery.of(context).size.height *
+                        0.05, // 5% of screen height
+                    alignment: Alignment.center,
+                    child: !_isDateView
+                        ? Text(
+                            _date,
+                            style: const TextStyle(
+                              fontSize: 30,
+                              fontWeight: FontWeight.w400,
+                            ),
+                            textAlign: TextAlign.center,
+                          )
+                        : null,
                   ),
                 ],
               ),
@@ -208,14 +237,15 @@ class _ClockScreenState extends State<ClockScreen> {
                 ElevatedButton(
                   onPressed: () {
                     setState(() {
-                      final now = DateTime.now();
-                      _hours =
-                          "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')} ${_formatAMPM(now.hour)}";
-                      _minutes = '';
+                      _date =
+                          _getFormattedDate(); // Set the current date when button is pressed
+                      _isDateView = !_isDateView; // Toggle date visibility
                     });
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFE5E5E5),
+                    backgroundColor: !_isDateView
+                        ? const Color(0xFFEEE8B6)
+                        : const Color(0xFFE5E5E5),
                     side: const BorderSide(color: Colors.black),
                     shape: RoundedRectangleBorder(
                       borderRadius:
