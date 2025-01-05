@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart'; // Correct import for debugPaintSizeEnabled
 import 'dart:async';
 
 void main() {
+  //debugPaintSizeEnabled = true; // Enable debug layout painting
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -14,6 +16,7 @@ class MyApp extends StatelessWidget {
       title: 'Tokei App',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        fontFamily: 'Arial',
       ),
       home: const ClockScreen(),
     );
@@ -21,7 +24,7 @@ class MyApp extends StatelessWidget {
 }
 
 class ClockScreen extends StatefulWidget {
-  const ClockScreen({Key? key}) : super(key: key);
+  const ClockScreen({super.key});
 
   @override
   _ClockScreenState createState() => _ClockScreenState();
@@ -29,8 +32,10 @@ class ClockScreen extends StatefulWidget {
 
 class _ClockScreenState extends State<ClockScreen> {
   late Timer _timer;
-  String _time = '';
+  String _hours = '';
+  String _minutes = '';
   bool _is24HourFormat = true; // Default to 24-hour format
+  bool _isColonVisible = true; // Track if the colon is visible or not
 
   @override
   void initState() {
@@ -50,11 +55,14 @@ class _ClockScreenState extends State<ClockScreen> {
   void _updateTime() {
     final DateTime now = DateTime.now();
     setState(() {
+      _isColonVisible = !_isColonVisible; // Toggle the colon visibility
       // Check format: 24-hour or 12-hour
       if (_is24HourFormat) {
-        _time = "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}";
+        _hours = now.hour.toString().padLeft(2, '0');
+        _minutes = now.minute.toString().padLeft(2, '0');
       } else {
-        _time = "${_formatTime(now.hour)}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')} ${_formatAMPM(now.hour)}";
+        _hours = _formatTime(now.hour);
+        _minutes = now.minute.toString().padLeft(2, '0');
       }
     });
   }
@@ -70,109 +78,52 @@ class _ClockScreenState extends State<ClockScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Tokei App'),
-      ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Center(
-            child: Text(
-              _time, // Display the current time
-              style: const TextStyle(
-                fontSize: 48,
-                fontWeight: FontWeight.bold,
-              ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Hour Text
+                Text(
+                  _hours,
+                  style: const TextStyle(
+                    fontSize: 100,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                // Blinking colon with fixed width and adjusted alignment
+                Container(
+                  width: 30, // Fixed width for the colon space
+                  alignment: Alignment
+                      .center, // Ensure the colon is centered vertically
+                  child: Text(
+                    _isColonVisible
+                        ? ':'
+                        : '', // Colon blinks by toggling visibility
+                    style: TextStyle(
+                      fontSize: 100,
+                      fontWeight: FontWeight.bold,
+                      color: _isColonVisible
+                          ? Colors.black
+                          : Colors
+                              .transparent, // Only color the colon when visible
+                    ),
+                  ),
+                ),
+                // Minute Text
+                Text(
+                  _minutes,
+                  style: const TextStyle(
+                    fontSize: 100,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Wrap(
-          spacing: 8.0, // Space between buttons
-          runSpacing: 8.0, // Space between rows of buttons
-          alignment: WrapAlignment.center, // Center the buttons
-          children: <Widget>[
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  _is24HourFormat = false; // Switch to 12-hour format
-                });
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: !_is24HourFormat ? const Color(0xFFEEE8B6) : const Color(0xFFE5E5E5),
-                side: const BorderSide(color: Colors.black),
-              ),
-              child: const Text(
-                '12h',
-                style: TextStyle(color: Colors.black),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  _is24HourFormat = true; // Switch to 24-hour format
-                });
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _is24HourFormat ? const Color(0xFFEEE8B6) : const Color(0xFFE5E5E5),
-                side: const BorderSide(color: Colors.black),
-              ),
-              child: const Text(
-                '24h',
-                style: TextStyle(color: Colors.black),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  final now = DateTime.now();
-                  _time = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')} ${_formatAMPM(now.hour)}";
-                });
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFE5E5E5),
-                side: const BorderSide(color: Colors.black),
-              ),
-              child: const Text(
-                'Date',
-                style: TextStyle(color: Colors.black),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  // Reset to default normal time view
-                  _updateTime();
-                });
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFE5E5E5),
-                side: const BorderSide(color: Colors.black),
-              ),
-              child: const Text(
-                'Normal',
-                style: TextStyle(color: Colors.black),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  // Flip clock logic can be added here
-                });
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFE5E5E5),
-                side: const BorderSide(color: Colors.black),
-              ),
-              child: const Text(
-                'Flip',
-                style: TextStyle(color: Colors.black),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
