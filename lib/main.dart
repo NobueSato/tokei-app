@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart'; // Correct import for debugPaintSizeEnabled
-import 'dart:async';
+import 'widgets/custom_button.dart';
+import 'widgets/global_button_overlay.dart';
+import 'dart:io'; // To detect the platform
+import 'package:flutter/rendering.dart'; // For debug options
+import 'screens/FlipScreen.dart'; // Import the FlipScreen file
+import 'services/clock_service.dart'; // Import the clock service
 
 void main() {
-  //debugPaintSizeEnabled = true; // Enable debug layout painting
+  //debugPaintSizeEnabled = true;
   runApp(const MyApp());
 }
 
@@ -15,10 +19,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Tokei App',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
-        fontFamily: 'Arial',
+        fontFamily: Platform.isIOS ? 'SFProText' : 'Inter', // Set fonts
       ),
       home: const ClockScreen(),
+      routes: {
+        '/flip': (context) => const FlipScreen(),
+      },
     );
   }
 }
@@ -31,255 +37,285 @@ class ClockScreen extends StatefulWidget {
 }
 
 class _ClockScreenState extends State<ClockScreen> {
-  late Timer _timer;
-  String _hours = '';
-  String _minutes = '';
-  bool _is24HourFormat = true; // Default to 24-hour format
-  bool _isColonVisible = true; // Track if the colon is visible or not
-  bool _isDateView = false; // Track if the date is visible or not
-  String _date = ''; // Store the formatted date
+  late ClockService _clockService;
 
   @override
   void initState() {
     super.initState();
-    _updateTime(); // Update immediately on start
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      _updateTime(); // Update every second
-    });
+    _clockService = ClockService();
+    _clockService.onDateVisibilityChanged = _updateDateVisibility;
+  }
+
+  void _updateDateVisibility() {
+    setState(() {});
   }
 
   @override
   void dispose() {
-    _timer.cancel(); // Cancel the timer when the widget is disposed
+    _clockService.dispose();
     super.dispose();
-  }
-
-  void _updateTime() {
-    final DateTime now = DateTime.now();
-    setState(() {
-      _isColonVisible = !_isColonVisible; // Toggle the colon visibility
-      // Check format: 24-hour or 12-hour
-      if (_is24HourFormat) {
-        _hours = now.hour.toString().padLeft(2, '0');
-        _minutes = now.minute.toString().padLeft(2, '0');
-      } else {
-        _hours = _formatTime(now.hour);
-        _minutes = now.minute.toString().padLeft(2, '0');
-      }
-    });
-  }
-
-  String _formatTime(int hour) {
-    return hour % 12 == 0 ? '12' : (hour % 12).toString().padLeft(2, '0');
-  }
-
-  String _formatAMPM(int hour) {
-    return hour >= 12 ? 'PM' : 'AM';
-  }
-
-  String _getFormattedDate() {
-    final DateTime now = DateTime.now();
-    final weekday =
-        ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][now.weekday - 1];
-    return '${now.year} - ${now.month.toString().padLeft(2, '0')} - ${now.day.toString().padLeft(2, '0')} $weekday';
   }
 
   @override
   Widget build(BuildContext context) {
+    bool isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+
+    double fontSize = isLandscape ? 200.0 : 80.0;
+    // Calculate the heights based on the percentages
+    double topLayerHeight = MediaQuery.of(context).size.height * 0.2347;
+    double middleLayerHeight = MediaQuery.of(context).size.height * 0.608;
+    double bottomLayerHeight = MediaQuery.of(context).size.height * 0.1573;
+
     return Scaffold(
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Hour Text
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        _hours,
-                        style: const TextStyle(
-                          fontSize: 100,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      // Blinking colon with fixed width and adjusted alignment
-                      Container(
-                        width: MediaQuery.of(context).size.width *
-                            0.08, // Fixed width for the colon space. 8% of screen width
-                        alignment: Alignment
-                            .center, // Ensure the colon is centered vertically
-                        child: Text(
-                          _isColonVisible
-                              ? ':'
-                              : '', // Colon blinks by toggling visibility
-                          style: TextStyle(
-                            fontSize: 100,
-                            fontWeight: FontWeight.bold,
-                            color: _isColonVisible
-                                ? Colors.black
-                                : Colors
-                                    .transparent, // Only color the colon when visible
-                          ),
-                        ),
-                      ),
-                      // Minute Text
-                      Text(
-                        _minutes,
-                        style: const TextStyle(
-                          fontSize: 100,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Container(
-                    height: MediaQuery.of(context).size.height *
-                        0.05, // 5% of screen height
-                    alignment: Alignment.center,
-                    child: !_isDateView
-                        ? Text(
-                            _date,
-                            style: const TextStyle(
-                              fontSize: 25,
-                              fontWeight: FontWeight.w400,
-                            ),
-                            textAlign: TextAlign.center,
-                          )
-                        : null,
-                  ),
-                ],
-              ),
-            ),
-          ],
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFFD3D5E0), Color(0xFFD7D9E5)],
+            stops: [0.045, 0.949],
+            transform: GradientRotation(
+                11 * 3.14159 / 180), // Apply 11-degree rotation
+          ),
         ),
-        bottomNavigationBar: SizedBox(
-          height: MediaQuery.of(context).size.height *
-              0.2, // 20% of viewport height
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: GridView.count(
-              crossAxisCount: 3, // 3 columns
-              mainAxisSpacing: 8.0, // Spacing between rows
-              crossAxisSpacing: 8.0, // Spacing between columns
-              shrinkWrap: true, // Adjusts size based on content
-              physics:
-                  const NeverScrollableScrollPhysics(), // Disable scrolling
-              childAspectRatio: 2.0, // Aspect ratio for each child
-              children: <Widget>[
-                // First Row: 12h, empty, Normal
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _is24HourFormat = false; // Switch to 12-hour format
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: !_is24HourFormat
-                        ? const Color(0xFFEEE8B6)
-                        : const Color(0xFFE5E5E5),
-                    side: const BorderSide(color: Colors.black),
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(12.0), // Set corner radius
-                    ),
-                  ),
-                  child: const Text(
-                    '12h',
-                    style: TextStyle(color: Colors.black),
-                  ),
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                // Top Layer
+                Container(
+                  height: topLayerHeight,
                 ),
-                // Empty placeholder
-                Container(),
-                // Normal button
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _updateTime();
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFE5E5E5),
-                    side: const BorderSide(color: Colors.black),
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(12.0), // Set corner radius
+                // Middle Layer
+                Container(
+                  height: middleLayerHeight,
+                  color: Colors.transparent, // Add a color if needed
+                  alignment: Alignment.center, // Align Column content
+                  child: Row(children: [
+                    // Space between AM/PM and clock
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.1404,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          // AM Text
+                          Text(
+                            'AM', // Display AM based on the hour
+                            style: TextStyle(
+                              fontSize: fontSize * 0.1, // Adjust size if needed
+                              fontWeight: FontWeight.w700,
+                              color: _clockService.is24HourFormat
+                                  ? Colors
+                                      .transparent // Don't show AM when 24-hour format
+                                  : (_clockService.amPm == 'AM'
+                                      ? Colors.black // Darker color for AM
+                                      : Colors.grey), // Lighter color for PM
+                            ),
+                          ),
+                          SizedBox(
+                            height:
+                                fontSize * 0.05, // Keep space between AM and PM
+                          ),
+                          // PM Text
+                          Text(
+                            'PM', // Display PM based on the hour
+                            style: TextStyle(
+                              fontSize: fontSize * 0.1, // Adjust size if needed
+                              fontWeight: FontWeight.w700,
+                              color: _clockService.is24HourFormat
+                                  ? Colors
+                                      .transparent // Don't show PM when 24-hour format
+                                  : (_clockService.amPm == 'PM'
+                                      ? Colors.black // Darker color for PM
+                                      : Colors.grey), // Lighter color for AM
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  child: const Text(
-                    'Normal',
-                    style: TextStyle(color: Colors.black),
-                  ),
+                    // Time Text
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.7192,
+                      alignment: Alignment.center, // Align Column content
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // Hours
+                              Expanded(
+                                child: Text(
+                                  _clockService.hours,
+                                  style: TextStyle(
+                                    fontSize: fontSize,
+                                    fontWeight: FontWeight.w700,
+                                    height:
+                                        1.0, // Ensures text aligns to the top
+                                    letterSpacing:
+                                        -10, // Adjust this value for more/less spacing
+                                  ),
+                                  textAlign: TextAlign
+                                      .center, // Center text within the Expanded widget
+                                ),
+                              ),
+                              // :
+                              Container(
+                                alignment: Alignment.topCenter,
+                                width: fontSize * 0.3, // Fixed width for colon
+                                child: Opacity(
+                                  opacity:
+                                      _clockService.isColonVisible ? 1.0 : 0.0,
+                                  child: Text(
+                                    ':',
+                                    style: TextStyle(
+                                      fontSize: fontSize,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.black,
+                                      height:
+                                          0.8, // Ensure colon is vertically aligned with text
+                                      letterSpacing:
+                                          -10, // Adjust this value for more/less spacing
+                                    ),
+                                    textHeightBehavior: TextHeightBehavior(
+                                      applyHeightToFirstAscent:
+                                          true, // Disable height for ascent
+                                      applyHeightToLastDescent:
+                                          false, // Apply height for descent
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              // Minutes
+                              Expanded(
+                                child: Text(
+                                  _clockService.minutes,
+                                  textAlign: TextAlign
+                                      .center, // Center text within the Expanded widget
+                                  style: TextStyle(
+                                    fontSize: fontSize,
+                                    fontWeight: FontWeight.w700,
+                                    height: 1.0,
+                                    letterSpacing:
+                                        -10, // Adjust this value for more/less spacing
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Expanded(
+                            child: Container(
+                              alignment: Alignment
+                                  .center, // Centers content horizontally
+                              child: _clockService.isDateSelected
+                                  ? Text(
+                                      _clockService.date,
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        fontSize: 25,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    )
+                                  : null,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.1404,
+                    ),
+                  ]),
                 ),
-                // Second Row: 24h, Date, Flip
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _is24HourFormat = true; // Switch to 24-hour format
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _is24HourFormat
-                        ? const Color(0xFFEEE8B6)
-                        : const Color(0xFFE5E5E5),
-                    side: const BorderSide(color: Colors.black),
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(12.0), // Set corner radius
-                    ),
-                  ),
-                  child: const Text(
-                    '24h',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _date =
-                          _getFormattedDate(); // Set the current date when button is pressed
-                      _isDateView = !_isDateView; // Toggle date visibility
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: !_isDateView
-                        ? const Color(0xFFEEE8B6)
-                        : const Color(0xFFE5E5E5),
-                    side: const BorderSide(color: Colors.black),
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(12.0), // Set corner radius
-                    ),
-                  ),
-                  child: const Text(
-                    'Date',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      // Flip clock logic can be added here
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFEEEEEE),
-                    side: const BorderSide(color: Colors.black),
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(12.0), // Set corner radius
-                    ),
-                  ),
-                  child: const Text(
-                    'Flip',
-                    style: TextStyle(color: Colors.black),
-                  ),
+                // Bottom Layer
+                Container(
+                  height: bottomLayerHeight,
                 ),
               ],
             ),
-          ),
-        ));
+            // Global Button Overlay
+            GlobalButtonOverlay(
+              buttons: [
+                CustomButton(
+                  text: 'CALENDAR',
+                  onPressed: () {},
+                  isSelected: false,
+                ),
+                CustomButton(
+                  text: 'WORLD CLOCK',
+                  onPressed: () {},
+                  isSelected: false,
+                ),
+                CustomButton(
+                  text: 'STOPWATCH',
+                  onPressed: () {},
+                  isSelected: false,
+                ),
+                CustomButton(
+                  text: 'TIMER',
+                  onPressed: () {},
+                  isSelected: false,
+                ),
+                CustomButton(
+                  text: 'D',
+                  onPressed: () {},
+                  isSelected: false,
+                ),
+                CustomButton(
+                  text: 'A',
+                  onPressed: () {},
+                  isSelected: false,
+                ),
+                CustomButton(
+                  text: '12h',
+                  onPressed: () {
+                    setState(() {
+                      _clockService.toggle24HourFormat();
+                    });
+                  },
+                  isSelected: !_clockService.is24HourFormat,
+                ),
+                CustomButton(
+                  text: '24h',
+                  onPressed: () {
+                    setState(() {
+                      _clockService.toggle24HourFormat();
+                    });
+                  },
+                  isSelected: _clockService.is24HourFormat,
+                ),
+                CustomButton(
+                  text: '',
+                  onPressed: () {},
+                  isSelected: false,
+                ),
+                CustomButton(
+                  text: 'Date',
+                  onPressed: () {
+                    setState(() {
+                      _clockService.toggleDateView();
+                    });
+                  },
+                  isSelected: _clockService.date.isNotEmpty,
+                ),
+                CustomButton(
+                  text: 'Normal',
+                  onPressed: () {},
+                  isSelected: true,
+                ),
+                CustomButton(
+                  text: 'Flip',
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/flip');
+                  },
+                  isSelected: false,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
