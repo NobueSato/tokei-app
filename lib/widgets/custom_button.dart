@@ -9,11 +9,14 @@ class CustomButton extends StatelessWidget {
     required this.text,
     required this.onPressed,
     required this.isSelected,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
+    bool isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+    double buttonFontSize = isLandscape ? 18.0 : 14.0;
     // If text is empty, return an empty SizedBox
     if (text.isEmpty) {
       return SizedBox.shrink(); // No button rendered
@@ -26,15 +29,19 @@ class CustomButton extends StatelessWidget {
         backgroundColor:
             isSelected ? const Color(0xFFB9BCCD) : const Color(0x80FFFFFF),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.0),
+          borderRadius: BorderRadius.circular(10.0),
         ),
-        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 20.0),
+        // padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 20.0),
       ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Colors.black,
-          fontWeight: FontWeight.w700,
+      child: FittedBox(
+        fit: BoxFit.contain,
+        child: Text(
+          text,
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: buttonFontSize,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ),
     );

@@ -5,8 +5,7 @@ import 'custom_button.dart'; // Import your CustomButton file here
 class GlobalButtonOverlay extends StatefulWidget {
   final List<CustomButton> buttons;
 
-  const GlobalButtonOverlay({required this.buttons, Key? key})
-      : super(key: key);
+  const GlobalButtonOverlay({required this.buttons, super.key});
 
   @override
   State<GlobalButtonOverlay> createState() => _GlobalButtonOverlayState();
@@ -63,9 +62,11 @@ class _GlobalButtonOverlayState extends State<GlobalButtonOverlay> {
               child: Column(
                 children: [
                   // 1st Row (Horizontal, 4 buttons)
-                  Container(
-                    height: MediaQuery.of(context).size.height *
-                        0.21, // Fixed height for the row
+                  SizedBox(
+                    height: !isPortrait
+                        ? MediaQuery.of(context).size.height * 0.21
+                        : MediaQuery.of(context).size.height *
+                            0.1945, // Fixed height for the row
                     width: MediaQuery.of(context).size.width *
                         0.83, // Fixed width for the row
                     child: Row(
@@ -83,37 +84,43 @@ class _GlobalButtonOverlayState extends State<GlobalButtonOverlay> {
                   ),
 
                   // 2nd Row (Vertical, 2 buttons)
-                  Container(
-                    height: MediaQuery.of(context).size.height *
-                        0.608, // Fixed height for second row
+                  SizedBox(
+                    height: !isPortrait
+                        ? MediaQuery.of(context).size.height * 0.608
+                        : MediaQuery.of(context).size.height *
+                            0.611, // Fixed height for second row
+                    //width: MediaQuery.of(context).size.width * 0.83,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Container(
-                          height: MediaQuery.of(context).size.height * 0.51,
-                          alignment: Alignment.center,
-                          width: MediaQuery.of(context).size.width * 0.21,
+                          width: !isPortrait
+                              ? MediaQuery.of(context).size.width * 0.08
+                              : MediaQuery.of(context).size.width * 0.064,
+                        ),
+                        Container(
+                          // height: MediaQuery.of(context).size.height * 0.608,
+                          //width: MediaQuery.of(context).size.width * 0.1404,
                           child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.end,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            //crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              if (widget.buttons.length >
-                                  4) // Check if there are more than 4 buttons
-                                SizedBox(
-                                  width: 50, // Set the desired width
-                                  height: 40, // Set the desired height
-                                  child: widget.buttons[4],
-                                ), // D button
-                              if (widget.buttons.length > 5) ...[
-                                const SizedBox(height: 30),
-                                SizedBox(
-                                  width: 50, // Set the desired width
-                                  height: 40, // Set the desired height
-                                  child: widget.buttons[5],
-                                ), // A button
-                              ],
+                              SizedBox(
+                                width: isPortrait
+                                    ? 40
+                                    : 44, // Set the desired width
+                                height: 40, // Set the desired height
+                                child: widget.buttons[4],
+                              ), // D button
+                              const SizedBox(height: 30),
+                              SizedBox(
+                                width: isPortrait
+                                    ? 40
+                                    : 44, // Set the desired width
+                                height: 40, // Set the desired height
+                                child: widget.buttons[5],
+                              ), // A button
                             ],
                           ),
                         ),
@@ -127,15 +134,18 @@ class _GlobalButtonOverlayState extends State<GlobalButtonOverlay> {
                     child: Container(
                       height: MediaQuery.of(context).size.height *
                           0.1573, // Fixed height for third row
+                      width: MediaQuery.of(context).size.width * 0.83,
+                      alignment: Alignment.bottomCenter,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: !isPortrait
-                          ? Container(
+                          ? SizedBox(
                               width: MediaQuery.of(context).size.width * 0.83,
                               child: Column(children: [
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
                                   children: List.generate(6, (index) {
                                     int buttonIndex = index +
                                         6; // Start from the 7th button (index 6)
@@ -172,27 +182,32 @@ class _GlobalButtonOverlayState extends State<GlobalButtonOverlay> {
                                 )
                               ]),
                             )
-                          : GridView.count(
-                              crossAxisCount: 3,
-                              mainAxisSpacing: 8.0,
-                              crossAxisSpacing: 8.0,
-                              physics: const NeverScrollableScrollPhysics(),
-                              childAspectRatio: 2.0,
-                              shrinkWrap: true,
-                              padding: const EdgeInsets.all(8.0),
-                              children: List.generate(6, (index) {
-                                int buttonIndex = index + 6; // Start from [6]
-                                return widget.buttons.length > buttonIndex
-                                    ? GestureDetector(
-                                        onTap: () {
-                                          _toggleButtons(); // Reset timer on button tap
-                                          widget.buttons[buttonIndex]
-                                              .onPressed(); // Call original onPressed
-                                        },
-                                        child: widget.buttons[buttonIndex],
-                                      )
-                                    : Container();
-                              }),
+                          : SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 0.1945,
+                              child: GridView.count(
+                                crossAxisCount: 3,
+                                mainAxisSpacing: 6.0,
+                                crossAxisSpacing: 6.0,
+                                physics: const NeverScrollableScrollPhysics(),
+                                childAspectRatio: 2.5,
+                                shrinkWrap: true,
+                                padding: const EdgeInsets.all(8.0),
+                                children: List<int>.from(
+                                        [6, 8, 9, 7, 10, 11]) // Custom order
+                                    .map((buttonIndex) {
+                                  return widget.buttons.length > buttonIndex
+                                      ? GestureDetector(
+                                          onTap: () {
+                                            _toggleButtons(); // Reset timer on button tap
+                                            widget.buttons[buttonIndex]
+                                                .onPressed(); // Call original onPressed
+                                          },
+                                          child: widget.buttons[buttonIndex],
+                                        )
+                                      : Container(); // Fallback for invalid index
+                                }).toList(),
+                              ),
                             ),
                     ),
                   ),
