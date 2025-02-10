@@ -7,6 +7,7 @@ import 'screens/calendar_screen.dart'; // Import the CalendarScreen file
 import 'screens/flip_screen.dart'; // Import the FlipScreen file
 import 'services/clock_service.dart'; // Import the clock service
 import 'package:flutter/services.dart';
+import 'package:wakelock/wakelock.dart';
 
 void main() {
   //debugPaintSizeEnabled = true;
@@ -20,6 +21,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     // Hide both status bar and navigation bar (using setSystemUIMode)
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
     return MaterialApp(
       title: 'Tokei App',
       theme: ThemeData(
@@ -47,6 +49,8 @@ class ClockScreenState extends State<ClockScreen> {
   @override
   void initState() {
     super.initState();
+    // Ensure the screen stays awake
+    Wakelock.enable();
     _clockService = ClockService();
     _clockService.onDateVisibilityChanged = _updateDateVisibility;
   }
@@ -58,6 +62,7 @@ class ClockScreenState extends State<ClockScreen> {
   @override
   void dispose() {
     _clockService.dispose();
+    Wakelock.disable(); // Disable the wakelock when the screen is disposed
     super.dispose();
   }
 
