@@ -99,30 +99,24 @@ class _GlobalButtonOverlayState extends State<GlobalButtonOverlay> {
                               ? MediaQuery.of(context).size.width * 0.08
                               : MediaQuery.of(context).size.width * 0.064,
                         ),
-                        Container(
-                          // height: MediaQuery.of(context).size.height * 0.608,
-                          //width: MediaQuery.of(context).size.width * 0.1404,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            //crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              SizedBox(
-                                width: isPortrait
-                                    ? 40
-                                    : 44, // Set the desired width
-                                height: 40, // Set the desired height
-                                child: widget.buttons[4],
-                              ), // D button
-                              const SizedBox(height: 30),
-                              SizedBox(
-                                width: isPortrait
-                                    ? 40
-                                    : 44, // Set the desired width
-                                height: 40, // Set the desired height
-                                child: widget.buttons[5],
-                              ), // A button
-                            ],
-                          ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          //crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            SizedBox(
+                              width:
+                                  isPortrait ? 40 : 44, // Set the desired width
+                              height: 40, // Set the desired height
+                              child: widget.buttons[4],
+                            ), // D button
+                            const SizedBox(height: 30),
+                            SizedBox(
+                              width:
+                                  isPortrait ? 40 : 44, // Set the desired width
+                              height: 40, // Set the desired height
+                              child: widget.buttons[5],
+                            ), // A button
+                          ],
                         ),
                       ],
                     ),

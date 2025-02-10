@@ -2,17 +2,14 @@ import 'package:flutter/material.dart';
 import 'widgets/custom_button.dart';
 import 'widgets/global_button_overlay.dart';
 import 'package:universal_io/io.dart'; // To detect the platform
-import 'package:flutter/rendering.dart'; // For debug options
-import 'screens/CalendarScreen.dart'; // Import the CalendarScreen file
-import 'screens/FlipScreen.dart'; // Import the FlipScreen file
+//import 'package:flutter/rendering.dart'; // For debug options
+import 'screens/calendar_screen.dart'; // Import the CalendarScreen file
+import 'screens/flip_screen.dart'; // Import the FlipScreen file
 import 'services/clock_service.dart'; // Import the clock service
 import 'package:flutter/services.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 void main() {
   //debugPaintSizeEnabled = true;
-  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   runApp(const MyApp());
 }
 
@@ -41,10 +38,10 @@ class ClockScreen extends StatefulWidget {
   const ClockScreen({super.key});
 
   @override
-  _ClockScreenState createState() => _ClockScreenState();
+  ClockScreenState createState() => ClockScreenState();
 }
 
-class _ClockScreenState extends State<ClockScreen> {
+class ClockScreenState extends State<ClockScreen> {
   late ClockService _clockService;
 
   @override
@@ -73,13 +70,13 @@ class _ClockScreenState extends State<ClockScreen> {
     double dateFontSize = isLandscape ? 20.0 : 14.0;
     // Calculate the heights based on the percentages
     double topLayerHeight =
-        MediaQuery.of(context).size.height * 0.2347; // 23.47%
+        MediaQuery.of(context).size.height * 0.2346; // 23.46%
     double middleLayerHeight =
-        MediaQuery.of(context).size.height * 0.608; // 60.8%
+        MediaQuery.of(context).size.height * 0.5893; // 60.8%
     double ampmContainerWidth = MediaQuery.of(context).size.width * 0.1404;
     double timeContainerWidth = MediaQuery.of(context).size.width * 0.7192;
     double bottomLayerHeight =
-        MediaQuery.of(context).size.height * 0.1573; // 15.73%
+        MediaQuery.of(context).size.height * 0.1761; // 17.61%
 
     return Scaffold(
       body: Container(
@@ -122,7 +119,8 @@ class _ClockScreenState extends State<ClockScreen> {
                                   ? Colors
                                       .transparent // Don't show AM when 24-hour format
                                   : (_clockService.amPm == 'AM'
-                                      ? Colors.black // Darker color for AM
+                                      ? Color.fromARGB(
+                                          0, 47, 47, 47) // Darker color for AM
                                       : Colors.grey), // Lighter color for PM
                             ),
                           ),
@@ -140,7 +138,8 @@ class _ClockScreenState extends State<ClockScreen> {
                                   ? Colors
                                       .transparent // Don't show PM when 24-hour format
                                   : (_clockService.amPm == 'PM'
-                                      ? Colors.black // Darker color for PM
+                                      ? Color.fromARGB(
+                                          0, 47, 47, 47) // Darker color for PM
                                       : Colors.grey), // Lighter color for AM
                             ),
                           ),
@@ -156,7 +155,8 @@ class _ClockScreenState extends State<ClockScreen> {
                           children: [
                             SizedBox(
                               height: isLandscape
-                                  ? MediaQuery.of(context).size.height * 0.54
+                                  ? MediaQuery.of(context).size.height *
+                                      0.5333 // 53.33% = 200px
                                   : null,
                               child: FittedBox(
                                 fit: BoxFit
@@ -201,7 +201,8 @@ class _ClockScreenState extends State<ClockScreen> {
                                             style: TextStyle(
                                               fontSize: fontSize,
                                               fontWeight: FontWeight.w700,
-                                              color: Colors.black,
+                                              color: Colors
+                                                  .black, // Set color to black
                                               height:
                                                   0.8, // Ensure colon is vertically aligned with text
                                             ),
@@ -238,7 +239,7 @@ class _ClockScreenState extends State<ClockScreen> {
                             ),
                             Container(
                               height: isLandscape
-                                  ? MediaQuery.of(context).size.height * 0.0567
+                                  ? MediaQuery.of(context).size.height * 0.056
                                   : dateFontSize,
                               alignment: Alignment
                                   .center, // Centers content horizontally
