@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-//import '../widgets/custom_button.dart'; // Import your CustomButton file here
+// import '../widgets/custom_button.dart'; // Import your CustomButton file here
 // import '../widgets/global_button_overlay.dart';
 
 class CalendarScreen extends StatefulWidget {
@@ -86,16 +86,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               selectedDayPredicate: (day) =>
                                   _selectedDay != null &&
                                   isSameDay(day, _selectedDay),
-                              onDaySelected: (selectedDay, focusedDay) {
-                                if (!isSameDay(_selectedDay, selectedDay)) {
-                                  setState(() {
-                                    _selectedDay = selectedDay;
-                                    _focusedDay = focusedDay;
-                                    print(
-                                        'selected day$selectedDay and focusedDay $focusedDay');
-                                  });
-                                }
-                              },
                               onFormatChanged: (format) {
                                 if (_calendarFormat != format) {
                                   // Call `setState()` when updating calendar format
@@ -158,7 +148,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ],
           ),
         ),
-        // Global Button Overlay
         // GlobalButtonOverlay(
         //   buttons: [
         //     CustomButton(
@@ -216,7 +205,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         //     CustomButton(
         //       text: 'NORMAL',
         //       onPressed: () {
-        //         Navigator.pop(context);
+        //         Navigator.pushNamed(context, '/main');
         //       },
         //       isSelected: true,
         //     ),
