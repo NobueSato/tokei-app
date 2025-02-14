@@ -1,17 +1,27 @@
 import 'package:flutter/material.dart';
-import 'widgets/custom_button.dart';
-import 'widgets/global_button_overlay.dart';
-import 'package:universal_io/io.dart'; // To detect the platform
-//import 'package:flutter/rendering.dart'; // For debug options
 import 'package:flutter/services.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
+import 'package:universal_io/io.dart'; // To detect the platform
+import 'package:provider/provider.dart';
+import 'services/clock_service.dart';
+import 'widgets/custom_button.dart';
+import 'widgets/global_button_overlay.dart';
+//import 'package:flutter/rendering.dart'; // For debug options
 import 'widgets/clock_widget.dart'; // Import the ClockWidget file
 import 'screens/calendar_screen.dart'; // Import the CalendarScreen file
 import 'screens/flip_screen.dart'; // Import the FlipScreen file
 
 void main() {
   //debugPaintSizeEnabled = true;
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+            create: (_) => ClockService()), // Add ClockService here
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -39,13 +49,11 @@ class MyApp extends StatelessWidget {
 
 class ClockScreen extends StatefulWidget {
   const ClockScreen({super.key});
-
   @override
   State<ClockScreen> createState() => _ClockScreenState();
 }
 
 class _ClockScreenState extends State<ClockScreen> {
-  bool _is12hSelected = true; // Default: Show 12h format
   bool _isDateSelected = false; // Default: Hide Date
 
   @override
@@ -54,10 +62,6 @@ class _ClockScreenState extends State<ClockScreen> {
     // Ensure the screen stays awake
     WakelockPlus.enable();
   }
-
-  // void _updateDateVisibility() {
-  //   setState(() {});
-  // }
 
   @override
   void dispose() {
@@ -69,7 +73,8 @@ class _ClockScreenState extends State<ClockScreen> {
   Widget build(BuildContext context) {
     bool isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
-    double fontSize = isLandscape ? 200.0 : 80.0;
+    double fontSize = isLandscape ? 220.0 : 80.0;
+    double amPmFontSize = isLandscape ? 22.0 : 16.0;
     double dateFontSize = isLandscape ? 20.0 : 14.0;
 
     return Scaffold(
@@ -87,11 +92,9 @@ class _ClockScreenState extends State<ClockScreen> {
         child: Stack(
           children: [
             ClockWidget(
-              fontSize: fontSize,
-              dateFontSize: dateFontSize,
-              isDateSelected: _isDateSelected,
-              is12hSelected: _is12hSelected,
-            ),
+                fontSize: fontSize,
+                dateFontSize: dateFontSize,
+                amPmFontSize: amPmFontSize),
             // Global Button Overlay
             GlobalButtonOverlay(
               buttons: [
@@ -128,25 +131,20 @@ class _ClockScreenState extends State<ClockScreen> {
                   isSelected: false,
                 ),
                 CustomButton(
-                    text: '12H',
-                    onPressed: () {
-                      setState(() {
-                        _is12hSelected = !_is12hSelected;
-                      });
-                    },
-                    isSelected: _is12hSelected),
+                  text: '12H',
+                  onPressed: () {
+                    Provider.of<ClockService>(context, listen: false)
+                        .toggleTimeFormat();
+                  },
+                  isSelected: Provider.of<ClockService>(context).is12hSelected,
+                ),
                 CustomButton(
                   text: '24H',
                   onPressed: () {
-                    setState(() {
-                      print(
-                          '24H button pressed before the value changed: $_is12hSelected');
-                      _is12hSelected = !_is12hSelected;
-                      print(
-                          '24H button pressed after the value changed: $_is12hSelected');
-                    });
+                    Provider.of<ClockService>(context, listen: false)
+                        .toggleTimeFormat();
                   },
-                  isSelected: !_is12hSelected,
+                  isSelected: !Provider.of<ClockService>(context).is12hSelected,
                 ),
                 CustomButton(
                   text: '',
@@ -156,11 +154,11 @@ class _ClockScreenState extends State<ClockScreen> {
                 CustomButton(
                   text: 'DATE',
                   onPressed: () {
-                    setState(() {
-                      _isDateSelected = !_isDateSelected;
-                    });
+                    Provider.of<ClockService>(context, listen: false)
+                        .toggleDate();
                   },
-                  isSelected: _isDateSelected,
+                  isSelected: Provider.of<ClockService>(context, listen: false)
+                      .isDateSelected,
                 ),
                 CustomButton(
                   text: 'NORMAL',
