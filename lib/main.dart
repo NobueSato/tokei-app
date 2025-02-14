@@ -3,11 +3,11 @@ import 'widgets/custom_button.dart';
 import 'widgets/global_button_overlay.dart';
 import 'package:universal_io/io.dart'; // To detect the platform
 //import 'package:flutter/rendering.dart'; // For debug options
+import 'package:flutter/services.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
+import 'widgets/clock_widget.dart'; // Import the ClockWidget file
 import 'screens/calendar_screen.dart'; // Import the CalendarScreen file
 import 'screens/flip_screen.dart'; // Import the FlipScreen file
-import 'services/clock_service.dart'; // Import the clock service
-import 'package:flutter/services.dart';
-import 'package:wakelock/wakelock.dart';
 
 void main() {
   //debugPaintSizeEnabled = true;
@@ -29,6 +29,7 @@ class MyApp extends StatelessWidget {
       ),
       home: const ClockScreen(),
       routes: {
+        '/main': (context) => const ClockScreen(),
         '/calendar': (context) => const CalendarScreen(),
         '/flip': (context) => const FlipScreen(),
       },
@@ -40,29 +41,27 @@ class ClockScreen extends StatefulWidget {
   const ClockScreen({super.key});
 
   @override
-  ClockScreenState createState() => ClockScreenState();
+  State<ClockScreen> createState() => _ClockScreenState();
 }
 
-class ClockScreenState extends State<ClockScreen> {
-  late ClockService _clockService;
+class _ClockScreenState extends State<ClockScreen> {
+  bool _is12hSelected = true; // Default: Show 12h format
+  bool _isDateSelected = false; // Default: Hide Date
 
   @override
   void initState() {
     super.initState();
     // Ensure the screen stays awake
-    Wakelock.enable();
-    _clockService = ClockService();
-    _clockService.onDateVisibilityChanged = _updateDateVisibility;
+    WakelockPlus.enable();
   }
 
-  void _updateDateVisibility() {
-    setState(() {});
-  }
+  // void _updateDateVisibility() {
+  //   setState(() {});
+  // }
 
   @override
   void dispose() {
-    _clockService.dispose();
-    Wakelock.disable(); // Disable the wakelock when the screen is disposed
+    WakelockPlus.disable(); // Disable the wakelock when the screen is disposed
     super.dispose();
   }
 
@@ -70,18 +69,8 @@ class ClockScreenState extends State<ClockScreen> {
   Widget build(BuildContext context) {
     bool isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
-
     double fontSize = isLandscape ? 200.0 : 80.0;
     double dateFontSize = isLandscape ? 20.0 : 14.0;
-    // Calculate the heights based on the percentages
-    double topLayerHeight =
-        MediaQuery.of(context).size.height * 0.2346; // 23.46%
-    double middleLayerHeight =
-        MediaQuery.of(context).size.height * 0.5893; // 60.8%
-    double ampmContainerWidth = MediaQuery.of(context).size.width * 0.1404;
-    double timeContainerWidth = MediaQuery.of(context).size.width * 0.7192;
-    double bottomLayerHeight =
-        MediaQuery.of(context).size.height * 0.1761; // 17.61%
 
     return Scaffold(
       body: Container(
@@ -97,185 +86,11 @@ class ClockScreenState extends State<ClockScreen> {
         ),
         child: Stack(
           children: [
-            Column(
-              children: [
-                // Top Layer
-                Container(
-                  height: topLayerHeight,
-                ),
-                // Middle Layer
-                SizedBox(
-                  height: middleLayerHeight,
-                  child: Row(children: [
-                    // Space between AM/PM and clock
-                    SizedBox(
-                      width: ampmContainerWidth,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          // AM Text
-                          Text(
-                            'AM', // Display AM based on the hour
-                            style: TextStyle(
-                              fontSize: fontSize * 0.1, // Adjust size if needed
-                              fontWeight: FontWeight.w500,
-                              color: _clockService.is24HourFormat
-                                  ? Colors
-                                      .transparent // Don't show AM when 24-hour format
-                                  : (_clockService.amPm == 'AM'
-                                      ? Color.fromARGB(
-                                          0, 47, 47, 47) // Darker color for AM
-                                      : Colors.grey), // Lighter color for PM
-                            ),
-                          ),
-                          SizedBox(
-                            height:
-                                fontSize * 0.2, // Keep space between AM and PM
-                          ),
-                          // PM Text
-                          Text(
-                            'PM', // Display PM based on the hour
-                            style: TextStyle(
-                              fontSize: fontSize * 0.1, // Adjust size if needed
-                              fontWeight: FontWeight.w500,
-                              color: _clockService.is24HourFormat
-                                  ? Colors
-                                      .transparent // Don't show PM when 24-hour format
-                                  : (_clockService.amPm == 'PM'
-                                      ? Color.fromARGB(
-                                          0, 47, 47, 47) // Darker color for PM
-                                      : Colors.grey), // Lighter color for AM
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    // Time Text
-                    Expanded(
-                      child: SizedBox(
-                        width: timeContainerWidth,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SizedBox(
-                              height: isLandscape
-                                  ? MediaQuery.of(context).size.height *
-                                      0.5333 // 53.33% = 200px
-                                  : null,
-                              child: FittedBox(
-                                fit: BoxFit
-                                    .contain, // Ensure text scales down uniformly
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment
-                                      .center, // Centers content horizontally
-                                  crossAxisAlignment: CrossAxisAlignment
-                                      .center, // Ensures vertical alignment
-                                  children: [
-                                    // Hours
-                                    FittedBox(
-                                      fit: BoxFit.contain,
-                                      child: Text(
-                                        _clockService.hours,
-                                        style: TextStyle(
-                                          fontSize: fontSize,
-                                          fontWeight: FontWeight.w700,
-                                          height:
-                                              1.0, // Ensures text aligns to the top
-                                          letterSpacing:
-                                              -7, // Adjust this value for more/less spacing
-                                        ),
-                                        textAlign: TextAlign
-                                            .end, // Center text within the FittedBox
-                                      ),
-                                    ),
-                                    // Colon
-                                    Container(
-                                      width: fontSize *
-                                          0.34, // Fixed width for colon
-                                      alignment:
-                                          Alignment.center, // Centers colon
-                                      child: Opacity(
-                                        opacity: _clockService.isColonVisible
-                                            ? 1.0
-                                            : 0.0,
-                                        child: FittedBox(
-                                          fit: BoxFit.contain,
-                                          child: Text(
-                                            ':',
-                                            style: TextStyle(
-                                              fontSize: fontSize,
-                                              fontWeight: FontWeight.w700,
-                                              color: Colors
-                                                  .black, // Set color to black
-                                              height:
-                                                  0.8, // Ensure colon is vertically aligned with text
-                                            ),
-                                            textHeightBehavior:
-                                                TextHeightBehavior(
-                                              applyHeightToFirstAscent:
-                                                  true, // Disable height for ascent
-                                              applyHeightToLastDescent:
-                                                  false, // Apply height for descent
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    // Minutes
-                                    FittedBox(
-                                      fit: BoxFit.contain,
-                                      child: Text(
-                                        _clockService.minutes,
-                                        textAlign: TextAlign
-                                            .start, // Center text within the FittedBox
-                                        style: TextStyle(
-                                          fontSize: fontSize,
-                                          fontWeight: FontWeight.w700,
-                                          height: 1.0,
-                                          letterSpacing:
-                                              -7, // Adjust this value for more/less spacing
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Container(
-                              height: isLandscape
-                                  ? MediaQuery.of(context).size.height * 0.056
-                                  : dateFontSize,
-                              alignment: Alignment
-                                  .center, // Centers content horizontally
-                              child: _clockService.isDateSelected
-                                  ? FittedBox(
-                                      fit: BoxFit.scaleDown,
-                                      child: Text(
-                                        _clockService.date,
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontSize: dateFontSize,
-                                          fontWeight: FontWeight.w400,
-                                        ),
-                                      ),
-                                    )
-                                  : null,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Container(
-                      width: MediaQuery.of(context).size.width * 0.1404,
-                    ),
-                  ]),
-                ),
-                // Bottom Layer
-                Container(
-                  height: bottomLayerHeight,
-                ),
-              ],
+            ClockWidget(
+              fontSize: fontSize,
+              dateFontSize: dateFontSize,
+              isDateSelected: _isDateSelected,
+              is12hSelected: _is12hSelected,
             ),
             // Global Button Overlay
             GlobalButtonOverlay(
@@ -313,36 +128,39 @@ class ClockScreenState extends State<ClockScreen> {
                   isSelected: false,
                 ),
                 CustomButton(
-                  text: '12H',
-                  onPressed: () {
-                    setState(() {
-                      _clockService.toggle24HourFormat();
-                    });
-                  },
-                  isSelected: !_clockService.is24HourFormat,
-                ),
+                    text: '12H',
+                    onPressed: () {
+                      setState(() {
+                        _is12hSelected = !_is12hSelected;
+                      });
+                    },
+                    isSelected: _is12hSelected),
                 CustomButton(
                   text: '24H',
                   onPressed: () {
                     setState(() {
-                      _clockService.toggle24HourFormat();
+                      print(
+                          '24H button pressed before the value changed: $_is12hSelected');
+                      _is12hSelected = !_is12hSelected;
+                      print(
+                          '24H button pressed after the value changed: $_is12hSelected');
                     });
                   },
-                  isSelected: _clockService.is24HourFormat,
+                  isSelected: !_is12hSelected,
                 ),
                 CustomButton(
                   text: '',
                   onPressed: () {},
-                  isSelected: false,
+                  isSelected: true,
                 ),
                 CustomButton(
                   text: 'DATE',
                   onPressed: () {
                     setState(() {
-                      _clockService.toggleDateView();
+                      _isDateSelected = !_isDateSelected;
                     });
                   },
-                  isSelected: _clockService.date.isNotEmpty,
+                  isSelected: _isDateSelected,
                 ),
                 CustomButton(
                   text: 'NORMAL',

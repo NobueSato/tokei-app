@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-// import '../widgets/custom_button.dart'; // Import your CustomButton file here
-// import '../widgets/global_button_overlay.dart';
+import '../widgets/clock_widget.dart';
+import '../widgets/custom_button.dart'; // Import your CustomButton file here
+import '../widgets/global_button_overlay.dart';
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
@@ -23,10 +24,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
     double topLayerHeight = isLandscape
         ? MediaQuery.of(context).size.height * 0.1013
         : 150; // 23.46%
-    //double middleLayerHeight = isLandscape?
-    //MediaQuery.of(context).size.height * 0.608 : 400; // 60.8%
     double bottomLayerHeight =
         isLandscape ? MediaQuery.of(context).size.height * 0.104 : 100; // 5%
+    bool _isDateSelected = false;
+    bool _is12hSelected = true;
 
     return Scaffold(
       body: Stack(children: [
@@ -59,12 +60,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     // Left Side: Smaller Clock
                     Expanded(
                       flex: 42,
-                      child: Center(
-                        child: SizedBox(
-                          height: 150, // Resize the clock widget
-                          width: 150,
-                          child: Text("Tokei"),
-                        ),
+                      child: ClockWidget(
+                        fontSize: 50,
+                        dateFontSize: 10,
+                        isDateSelected: _isDateSelected,
+                        is12hSelected: _is12hSelected,
                       ),
                     ),
                     // Right Side: Smaller Calendar
@@ -148,76 +148,76 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ],
           ),
         ),
-        // GlobalButtonOverlay(
-        //   buttons: [
-        //     CustomButton(
-        //       text: 'CALENDAR',
-        //       onPressed: () {
-        //         Navigator.pushNamed(context, '/calendar');
-        //       },
-        //       isSelected: false,
-        //     ),
-        //     CustomButton(
-        //       text: 'WORLD CLOCK',
-        //       onPressed: () {},
-        //       isSelected: false,
-        //     ),
-        //     CustomButton(
-        //       text: 'STOPWATCH',
-        //       onPressed: () {},
-        //       isSelected: false,
-        //     ),
-        //     CustomButton(
-        //       text: 'TIMER',
-        //       onPressed: () {},
-        //       isSelected: false,
-        //     ),
-        //     CustomButton(
-        //       text: 'D',
-        //       onPressed: () {},
-        //       isSelected: false,
-        //     ),
-        //     CustomButton(
-        //       text: 'A',
-        //       onPressed: () {},
-        //       isSelected: false,
-        //     ),
-        //     CustomButton(
-        //       text: '12H',
-        //       onPressed: () {},
-        //       isSelected: false,
-        //     ),
-        //     CustomButton(
-        //       text: '24H',
-        //       onPressed: () {},
-        //       isSelected: false,
-        //     ),
-        //     CustomButton(
-        //       text: '',
-        //       onPressed: () {},
-        //       isSelected: false,
-        //     ),
-        //     CustomButton(
-        //       text: 'DATE',
-        //       onPressed: () {},
-        //       isSelected: false,
-        //     ),
-        //     CustomButton(
-        //       text: 'NORMAL',
-        //       onPressed: () {
-        //         Navigator.pushNamed(context, '/main');
-        //       },
-        //       isSelected: true,
-        //     ),
-        //     CustomButton(
-        //       text: 'FLIP',
-        //       onPressed: () {
-        //         Navigator.pushNamed(context, '/flip');
-        //       },
-        //       isSelected: false,
-        //     ),
-        //   ],
-        // ),
+        GlobalButtonOverlay(
+          buttons: [
+            CustomButton(
+              text: 'CALENDAR',
+              onPressed: () {
+                Navigator.pushNamed(context, '/calendar');
+              },
+              isSelected: false,
+            ),
+            CustomButton(
+              text: 'WORLD CLOCK',
+              onPressed: () {},
+              isSelected: false,
+            ),
+            CustomButton(
+              text: 'STOPWATCH',
+              onPressed: () {},
+              isSelected: false,
+            ),
+            CustomButton(
+              text: 'TIMER',
+              onPressed: () {},
+              isSelected: false,
+            ),
+            CustomButton(
+              text: 'D',
+              onPressed: () {},
+              isSelected: false,
+            ),
+            CustomButton(
+              text: 'A',
+              onPressed: () {},
+              isSelected: false,
+            ),
+            CustomButton(
+              text: '12H',
+              onPressed: () {},
+              isSelected: false,
+            ),
+            CustomButton(
+              text: '24H',
+              onPressed: () {},
+              isSelected: false,
+            ),
+            CustomButton(
+              text: '',
+              onPressed: () {},
+              isSelected: false,
+            ),
+            CustomButton(
+              text: 'DATE',
+              onPressed: () {},
+              isSelected: false,
+            ),
+            CustomButton(
+              text: 'NORMAL',
+              onPressed: () {
+                Navigator.pushNamed(context, '/main');
+              },
+              isSelected: true,
+            ),
+            CustomButton(
+              text: 'FLIP',
+              onPressed: () {
+                Navigator.pushNamed(context, '/flip');
+              },
+              isSelected: false,
+            ),
+          ],
+        ),
       ]),
     );
   }
