@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:provider/provider.dart';
+import 'package:tokei_app/screens/flip_screen.dart';
+import '../main.dart';
 import '../services/clock_service.dart';
 import '../widgets/small_clock_widget.dart';
 import '../widgets/custom_button.dart'; // Import your CustomButton file here
@@ -20,6 +22,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   @override
   Widget build(BuildContext context) {
+    bool isDebugging = false;
     // Detect orientation
     bool isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
@@ -29,16 +32,26 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final clockService = Provider.of<ClockService>(context);
 
     // Calculate dynamic height and width percentages
-    double row1Height =
-        isLandscape ? screenHeight * 0.1013 : screenHeight * 0.1958; // 10.13%
-    double row2Height = isLandscape ? screenHeight * 0.7946 : 0.1379; // 79.46%
-    double row3Height = isLandscape ? screenHeight * 0.1015 : 0.246; // 10.15%
-    double row4Height = screenHeight * 0.3669; // 36.69%
-    double row5Height = screenHeight * 0.1945; // 19.45%
+    double row1Height = isLandscape
+        ? screenHeight * 0.1013
+        : screenHeight *
+            0.1800; // 10.13% when it's landscape, 19.58% when it's portrait
+    double row2Height = isLandscape
+        ? screenHeight * 0.7971
+        : screenHeight *
+            0.1700; // 79.46% when it's landscape, 13.89% when it's portrait
+    double row3Height = isLandscape
+        ? screenHeight * 0.1015
+        : screenHeight *
+            0.0900; // 10.15% when it's landscape, 24.6% when it's portraitt
+    double row4Height =
+        isLandscape ? screenHeight * 0.3669 : screenHeight * 0.3900; // 36.69%
+    double row5Height =
+        isLandscape ? screenHeight * 0.1945 : screenHeight * 0.1700; // 19.45%
 
-    double column1Width = screenWidth * 0.5517; // 55.17%
-    double column2Width = screenWidth * 0.40; // 44.83%
-    double column3Width = screenWidth * 0.048; // 4.92%
+    double column1Width = screenWidth * 0.58; // 55.17%
+    double column2Width = screenWidth * 0.34; // 44.83%
+    double column3Width = screenWidth * 0.08; // 4.92%
 
     double fontSize = isLandscape ? 100.0 : 80.0;
     double amPmFontSize = isLandscape ? 22.0 : 16.0;
@@ -67,19 +80,22 @@ class _CalendarScreenState extends State<CalendarScreen> {
               child: orientation == Orientation.landscape
                   ? Column(
                       children: [
-                        // 1st row
+                        // Row 1
                         Container(
                           height: row1Height,
-                          color: Colors.blue,
+                          color:
+                              isDebugging ? Colors.amber : Colors.transparent,
                         ),
+
+                        // Row 2
                         Container(
                           height: row2Height,
+                          color: isDebugging ? Colors.blue : Colors.transparent,
                           child: Row(
                             children: [
                               // 1st column
                               Container(
                                 width: column1Width,
-                                color: Colors.green,
                                 child: SmallClockWidget(
                                     fontSize: fontSize,
                                     dateFontSize: dateFontSize,
@@ -88,19 +104,18 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               // 2nd column: Smaller Calendar
                               Container(
                                 width: column2Width,
-                                color: Colors.orange,
                                 child: GestureDetector(
                                   behavior: HitTestBehavior
                                       .translucent, // Prevents gestures from passing to the calendar
                                   child: Container(
                                     width: column2Width * 0.9,
-                                    color: Colors.yellow,
                                     child: ListView(
                                       shrinkWrap: true,
                                       children: [
                                         TableCalendar(
                                           firstDay: DateTime.utc(2000, 1, 1),
                                           lastDay: DateTime.utc(2100, 12, 31),
+                                          rowHeight: 45,
                                           currentDay: null,
                                           focusedDay:
                                               _focusedDay, // This ensures the calendar focuses on the correct day
@@ -121,6 +136,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                             _focusedDay = focusedDay;
                                           },
                                           calendarStyle: CalendarStyle(
+                                            // Adjust row spacing (default is 52.0)
                                             todayDecoration: BoxDecoration(
                                               color: Colors
                                                   .transparent, // Remove background color
@@ -148,6 +164,34 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                           headerStyle: HeaderStyle(
                                             formatButtonVisible: false,
                                             titleCentered: true,
+                                            titleTextFormatter: (date,
+                                                    locale) =>
+                                                '${date.year}.${date.month.toString().padLeft(2, '0')}', // Format YYYY.MM
+                                            titleTextStyle: TextStyle(
+                                              fontSize: 20, // Change font size
+                                              fontWeight: FontWeight
+                                                  .w700, // Change font weight
+                                              color: Color(
+                                                  0xFF2F2F2F), // Optional: Change color
+                                            ),
+                                          ),
+                                          daysOfWeekStyle: DaysOfWeekStyle(
+                                            weekendStyle: TextStyle(
+                                              color: Colors.white,
+                                            ),
+                                            dowTextFormatter: (date, locale) {
+                                              const weekdays = [
+                                                'S',
+                                                'M',
+                                                'T',
+                                                'W',
+                                                'T',
+                                                'F',
+                                                'S'
+                                              ]; // Sunday to Saturday
+                                              return weekdays[date.weekday %
+                                                  7]; // Adjust for Sunday-based index
+                                            },
                                           ),
                                         ),
                                       ],
@@ -158,14 +202,19 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               // 3rd column
                               Container(
                                 width: column3Width,
-                                color: Colors.indigoAccent,
+                                color: isDebugging
+                                    ? Colors.brown
+                                    : Colors.transparent,
                               ),
                             ],
                           ),
                         ),
+                        // Row 3
                         Container(
                           height: row3Height,
-                          color: Colors.brown,
+                          color: isDebugging
+                              ? Colors.cyanAccent
+                              : Colors.transparent,
                         ),
                       ],
                     )
@@ -176,40 +225,41 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         // 1st row
                         Container(
                           height: row1Height,
-                          color: Colors.blue,
-                          child: Center(child: Text('First Row')),
+                          color: isDebugging ? Colors.pink : Colors.transparent,
                         ),
                         // 2nd row
                         Container(
-                            height: screenHeight * 0.18,
-                            color: Colors.amberAccent,
+                            height: row2Height,
+                            color:
+                                isDebugging ? Colors.blue : Colors.transparent,
                             child: SmallClockWidget(
                                 fontSize: fontSize,
                                 dateFontSize: dateFontSize,
                                 amPmFontSize: amPmFontSize)),
                         // 3rd row
                         Container(
-                          height: row1Height * 0.3,
-                          color: Colors.green,
+                          height: row3Height,
+                          color:
+                              isDebugging ? Colors.green : Colors.transparent,
                         ),
 
                         // 4th row: Calendar
                         Container(
-                          height: 350, // 36.69% of parent height
-                          color: Colors.orange,
+                          height: row4Height,
+                          color: isDebugging ? Colors.cyan : Colors.transparent,
                           child: GestureDetector(
                             behavior: HitTestBehavior
                                 .translucent, // Prevents gestures from passing to the calendar
                             child: Container(
                               height: 300,
                               width: 330,
-                              color: Colors.yellow,
                               child: ListView(
                                 shrinkWrap: true,
                                 children: [
                                   TableCalendar(
                                     firstDay: DateTime.utc(2000, 1, 1),
                                     lastDay: DateTime.utc(2100, 12, 31),
+                                    rowHeight: 45,
                                     currentDay: null,
                                     focusedDay:
                                         _focusedDay, // This ensures the calendar focuses on the correct day
@@ -219,15 +269,18 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                         isSameDay(day, _selectedDay),
                                     onFormatChanged: (format) {
                                       if (_calendarFormat != format) {
+                                        // Call `setState()` when updating calendar format
                                         setState(() {
                                           _calendarFormat = format;
                                         });
                                       }
                                     },
                                     onPageChanged: (focusedDay) {
+                                      // No need to call `setState()` here
                                       _focusedDay = focusedDay;
                                     },
                                     calendarStyle: CalendarStyle(
+                                      // Adjust row spacing (default is 52.0)
                                       todayDecoration: BoxDecoration(
                                         color: Colors
                                             .transparent, // Remove background color
@@ -255,6 +308,33 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                     headerStyle: HeaderStyle(
                                       formatButtonVisible: false,
                                       titleCentered: true,
+                                      titleTextFormatter: (date, locale) =>
+                                          '${date.year}.${date.month.toString().padLeft(2, '0')}', // Format YYYY.MM
+                                      titleTextStyle: TextStyle(
+                                        fontSize: 20, // Change font size
+                                        fontWeight: FontWeight
+                                            .w700, // Change font weight
+                                        color: Color(
+                                            0xFF2F2F2F), // Optional: Change color
+                                      ),
+                                    ),
+                                    daysOfWeekStyle: DaysOfWeekStyle(
+                                      weekendStyle: TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                      dowTextFormatter: (date, locale) {
+                                        const weekdays = [
+                                          'S',
+                                          'M',
+                                          'T',
+                                          'W',
+                                          'T',
+                                          'F',
+                                          'S'
+                                        ]; // Sunday to Saturday
+                                        return weekdays[date.weekday %
+                                            7]; // Adjust for Sunday-based index
+                                      },
                                     ),
                                   ),
                                 ],
@@ -265,8 +345,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
                         // 5th row
                         Container(
-                          height: 169, // 19.45% of parent height
-                          color: Colors.purple,
+                          height: row5Height,
+                          color: isDebugging ? Colors.red : Colors.transparent,
                         ),
                       ],
                     ),
@@ -310,18 +390,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
             CustomButton(
               text: '12H',
               onPressed: () {
-                Provider.of<ClockService>(context, listen: false)
-                    .toggleTimeFormat();
+                clockService.toggleTimeFormat();
               },
-              isSelected: Provider.of<ClockService>(context).is12hSelected,
+              isSelected: clockService.is12hSelected,
             ),
             CustomButton(
               text: '24H',
               onPressed: () {
-                Provider.of<ClockService>(context, listen: false)
-                    .toggleTimeFormat();
+                clockService.toggleTimeFormat();
               },
-              isSelected: !Provider.of<ClockService>(context).is12hSelected,
+              isSelected: !clockService.is12hSelected,
             ),
             CustomButton(
               text: '',
@@ -331,22 +409,36 @@ class _CalendarScreenState extends State<CalendarScreen> {
             CustomButton(
               text: 'DATE',
               onPressed: () {
-                Provider.of<ClockService>(context, listen: false).toggleDate();
+                clockService.toggleDate();
               },
-              isSelected: Provider.of<ClockService>(context, listen: false)
-                  .isDateSelected,
+              isSelected: clockService.isDateSelected,
             ),
             CustomButton(
               text: 'NORMAL',
               onPressed: () {
-                Navigator.pushNamed(context, '/main');
+                Navigator.pushReplacement(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) =>
+                        const ClockScreen(),
+                    transitionDuration: Duration(seconds: 0), // No transition
+                  ),
+                );
               },
               isSelected: true,
             ),
             CustomButton(
               text: 'FLIP',
               onPressed: () {
-                Navigator.pushNamed(context, '/flip');
+                //Navigator.pushNamed(context, '/flip');
+                Navigator.pushReplacement(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) =>
+                        const FlipScreen(),
+                    transitionDuration: Duration(seconds: 0), // No transition
+                  ),
+                );
               },
               isSelected: false,
             ),

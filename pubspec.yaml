@@ -2,7 +2,7 @@ name: tokei_app
 description: "Tokei app"
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.6
+version: 1.0.7
 
 environment:
   sdk: ^3.6.0
@@ -17,6 +17,7 @@ dependencies:
   flutter_native_splash: ^2.4.2
   provider: ^6.1.2
   wakelock_plus: ^1.2.10
+  analog_clock: ^0.1.0
 
 dev_dependencies:
   flutter_test:

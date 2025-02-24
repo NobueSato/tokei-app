@@ -20,6 +20,7 @@ class ClockWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final clockService = Provider.of<ClockService>(context);
+    bool isDebugging = true;
     bool isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
     // Get the screen height using MediaQuery
@@ -36,16 +37,16 @@ class ClockWidget extends StatelessWidget {
         : 4310; // 43.1% when it's portrait
     int row2Column1width = isLandscape
         ? 0789 // 7.89% when it's landscape
-        : 0640; // 6.4% when it's portrait
+        : 0250; // 2.500% when it's portrait
     int row2Column2width = isLandscape
         ? 0615 // 6.15% when it's landscape
-        : 1146; // 11.46% when it's portrait
+        : 1346; // 13.46% when it's portrait
     int row2Column3width = isLandscape
         ? 7426 // 74.26% when it's landscape
-        : 5707; // 57.07% when it's portrait
+        : 6700; // 57.07% when it's portrait
     int row2Column4width = isLandscape
         ? 1170 // 11.70% when it's landscape
-        : 2106; // 21.06% when it's portrait
+        : 1604; // 7.28% when it's portrait
     int dateHeight = isLandscape
         ? 0774 // 12.67% when it's landscape
         : 0246; // 2.46% when it's portrait
@@ -58,7 +59,9 @@ class ClockWidget extends StatelessWidget {
         // Row 1: Space above the clock
         Expanded(
           flex: row1height,
-          child: Container(),
+          child: Container(
+            color: isDebugging ? Colors.amber : Colors.transparent,
+          ),
         ),
 
         // Row 2: Clock
@@ -69,58 +72,60 @@ class ClockWidget extends StatelessWidget {
               // far left space row2Column1
               Expanded(
                 flex: row2Column1width,
-                child: Container(), //color: Colors.orangeAccent),
+                child: Container(
+                  color: isDebugging ? Colors.blue : Colors.transparent,
+                ),
               ),
               // Space between AM/PM and clock
               Expanded(
                 flex: row2Column2width, // 14.04% of the row's width
                 child: Container(
-                  // color: Colors.blue,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      FittedBox(
+                  color: isDebugging ? Colors.greenAccent : Colors.transparent,
+                  alignment: isLandscape
+                      ? Alignment.centerLeft
+                      : Alignment.centerRight,
+                  child: Container(
+                    height: amPmHeight,
+                    color:
+                        isDebugging ? Colors.indigoAccent : Colors.transparent,
+                    child: SizedBox(
+                      height: amPmHeight,
+                      child: FittedBox(
                         fit: BoxFit.scaleDown,
-                        child: Container(
-                          height: amPmHeight,
-                          // color: Colors.purple,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment
-                                    .spaceBetween, // Space in between
-                                children: [
-                                  // AM Text
-                                  Text(
-                                    clockService.amPm == '' ? '' : 'AM',
-                                    style: TextStyle(
-                                      fontSize: amPmFontSize,
-                                      fontWeight: FontWeight.w600,
-                                      color: clockService.amPm == 'PM'
-                                          ? Colors.grey
-                                          : Colors.black,
-                                    ),
-                                  ),
-                                  // PM Text
-                                  Text(
-                                    clockService.amPm == '' ? '' : 'PM',
-                                    style: TextStyle(
-                                      fontSize: amPmFontSize,
-                                      fontWeight: FontWeight.w600,
-                                      color: clockService.amPm == 'AM'
-                                          ? Colors.grey
-                                          : Colors.black,
-                                    ),
-                                  ),
-                                ],
+                        child: Column(
+                          children: [
+                            // AM Text
+                            Text(
+                              clockService.amPm == '' ? '' : 'AM',
+                              style: TextStyle(
+                                fontSize: amPmFontSize,
+                                fontWeight: FontWeight.w600,
+                                backgroundColor: Colors.yellow,
+                                color: clockService.amPm == 'PM'
+                                    ? Color(0xFF8F8F8F)
+                                    : Color(0xFF2F2F2F),
                               ),
-                            ],
-                          ),
+                            ),
+                            // Responsive Space
+                            SizedBox(
+                                height: amPmFontSize *
+                                    1.3), // Adjust proportionally
+                            // PM Text
+                            Text(
+                              clockService.amPm == '' ? '' : 'PM',
+                              style: TextStyle(
+                                fontSize: amPmFontSize,
+                                fontWeight: FontWeight.w600,
+                                backgroundColor: Colors.yellow,
+                                color: clockService.amPm == 'AM'
+                                    ? Color(0xFF8F8F8F)
+                                    : Color(0xFF2F2F2F),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -133,15 +138,18 @@ class ClockWidget extends StatelessWidget {
                         constraints.maxWidth; // Get the parent width
                     double availableHeight = constraints.maxHeight;
                     return Container(
-                      // color: const Color.fromARGB(255, 200, 173, 246),
+                      color:
+                          isDebugging ? Colors.pinkAccent : Colors.transparent,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           // Hours
                           Container(
-                            // color: const Color.fromARGB(255, 182, 245, 215),
-                            width: availableWidth * 0.41,
+                            color: isDebugging
+                                ? Colors.yellow
+                                : Colors.transparent,
+                            width: availableWidth * 0.44,
                             alignment: Alignment.centerRight,
                             child: FittedBox(
                               fit: BoxFit.contain,
@@ -150,40 +158,40 @@ class ClockWidget extends StatelessWidget {
                                 style: TextStyle(
                                   fontSize: fontSize,
                                   fontWeight: FontWeight.w700,
+                                  color: Color(0xFF2F2F2F),
                                   height: 1.0,
-                                  letterSpacing: isLandscape ? -1 : -5,
+                                  letterSpacing: isLandscape ? -1 : -3,
                                 ),
-                                textAlign: TextAlign.end,
                               ),
                             ),
                           ),
 
                           // Colon
                           Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              FittedBox(
-                                fit: BoxFit.scaleDown,
-                                child: Container(
-                                  width: isLandscape
-                                      ? availableWidth * 0.12
-                                      : availableWidth * 0.09,
-                                  height: availableHeight * 0.95,
-                                  child: FittedBox(
-                                    fit: BoxFit.scaleDown,
-                                    child: Text(
-                                      clockService.isColonVisible ? ':' : ' ',
-                                      style: TextStyle(
-                                          fontSize: fontSize * 0.9,
-                                          fontWeight: FontWeight.w700,
-                                          color: Colors.black,
-                                          letterSpacing: isLandscape ? 1 : -1,
-                                          height: 1),
-                                      textHeightBehavior:
-                                          const TextHeightBehavior(
-                                        applyHeightToFirstAscent: true,
-                                        applyHeightToLastDescent: false,
-                                      ),
+                              Container(
+                                color: isDebugging
+                                    ? Colors.deepOrange
+                                    : Colors.transparent,
+                                width: isLandscape
+                                    ? availableWidth * 0.12
+                                    : availableWidth * 0.08,
+                                height: availableHeight,
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    clockService.isColonVisible ? ':' : ' ',
+                                    textAlign: TextAlign.start,
+                                    style: TextStyle(
+                                        fontSize: fontSize,
+                                        fontWeight: FontWeight.w700,
+                                        color: Color(0xFF2F2F2F),
+                                        letterSpacing: isLandscape ? 1 : -3,
+                                        height: 0.9),
+                                    textHeightBehavior:
+                                        const TextHeightBehavior(
+                                      applyHeightToFirstAscent: true,
+                                      applyHeightToLastDescent: false,
                                     ),
                                   ),
                                 ),
@@ -192,19 +200,21 @@ class ClockWidget extends StatelessWidget {
                           ),
                           // Minutes
                           Container(
-                            //color: Colors.blue,
-                            width: availableWidth * 0.41,
+                            color: isDebugging
+                                ? Colors.orange
+                                : Colors.transparent,
+                            width: availableWidth * 0.44,
                             alignment: Alignment.centerLeft,
                             child: FittedBox(
                               fit: BoxFit.contain,
                               child: Text(
                                 clockService.minutes,
-                                textAlign: TextAlign.start,
                                 style: TextStyle(
                                   fontSize: fontSize,
                                   fontWeight: FontWeight.w700,
+                                  color: Color(0xFF2F2F2F),
                                   height: 1.0,
-                                  letterSpacing: isLandscape ? -1 : -5,
+                                  letterSpacing: isLandscape ? -1 : -3,
                                 ),
                               ),
                             ),
@@ -217,7 +227,9 @@ class ClockWidget extends StatelessWidget {
               ),
               Expanded(
                 flex: row2Column4width,
-                child: Container(color: Colors.transparent),
+                child: Container(
+                  color: isDebugging ? Colors.tealAccent : Colors.transparent,
+                ),
               ),
             ],
           ),
@@ -226,12 +238,11 @@ class ClockWidget extends StatelessWidget {
         Expanded(
           flex: dateHeight,
           child: Container(
-            // color: Colors.brown,
+            color: isDebugging ? Colors.brown : Colors.transparent,
             alignment: Alignment.center,
             child: clockService.isDateSelected
                 ? Text(
                     clockService.date,
-                    textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: dateFontSize,
                       fontWeight: FontWeight.w400,
@@ -242,7 +253,9 @@ class ClockWidget extends StatelessWidget {
         ),
         Expanded(
           flex: row3Height, // 15.47% of the parent's height
-          child: Container(),
+          child: Container(
+            color: isDebugging ? Colors.red : Colors.transparent,
+          ),
         ),
       ],
     );

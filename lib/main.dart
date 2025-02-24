@@ -54,8 +54,6 @@ class ClockScreen extends StatefulWidget {
 }
 
 class _ClockScreenState extends State<ClockScreen> {
-  bool _isDateSelected = false; // Default: Hide Date
-
   @override
   void initState() {
     super.initState();
@@ -65,7 +63,6 @@ class _ClockScreenState extends State<ClockScreen> {
 
   @override
   void dispose() {
-    WakelockPlus.disable(); // Disable the wakelock when the screen is disposed
     super.dispose();
   }
 
@@ -101,7 +98,16 @@ class _ClockScreenState extends State<ClockScreen> {
                 CustomButton(
                   text: 'CALENDAR',
                   onPressed: () {
-                    Navigator.pushNamed(context, '/calendar');
+                    //Navigator.pushNamed(context, '/calendar');
+                    Navigator.pushReplacement(
+                      context,
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) =>
+                            const CalendarScreen(),
+                        transitionDuration:
+                            Duration(seconds: 0), // No transition
+                      ),
+                    );
                   },
                   isSelected: false,
                 ),
@@ -168,7 +174,16 @@ class _ClockScreenState extends State<ClockScreen> {
                 CustomButton(
                   text: 'FLIP',
                   onPressed: () {
-                    Navigator.pushNamed(context, '/flip');
+                    // Navigator.pushNamed(context, '/flip');
+                    Navigator.pushReplacement(
+                      context,
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) =>
+                            const FlipScreen(),
+                        transitionDuration:
+                            Duration(seconds: 0), // No transition
+                      ),
+                    );
                   },
                   isSelected: false,
                 ),

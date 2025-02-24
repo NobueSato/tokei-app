@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:tokei_app/main.dart';
+import 'package:tokei_app/screens/calendar_screen.dart';
 import '../widgets/flip_clock_widget.dart'; // Import FlipClockWidget
 import '../widgets/custom_button.dart'; // Import CustomButton
 import '../widgets/global_button_overlay.dart'; // Import GlobalButtonOverlay
 import '../widgets/flip_clock_theme.dart'; // Import ClockTheme if necessary
+import '../services/clock_service.dart';
 
 class FlipWidget extends StatelessWidget {
   final Widget child;
@@ -41,6 +45,7 @@ class FlipScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final clockService = Provider.of<ClockService>(context);
     // Define or retrieve the theme here
     final ClockTheme clockTheme = ClockTheme(
       name: 'My Clock Theme', // Add a name for the theme
@@ -80,18 +85,31 @@ class FlipScreen extends StatelessWidget {
           child: Stack(
             children: [
               // Centered FlipClockWidget
-              Center(
-                child: FlipClockWidget(
-                  theme: clockTheme, // Pass the theme
-                ),
-              ),
+              OrientationBuilder(builder: (context, orientation) {
+                // You can adjust the layout based on the orientation
+                return Center(
+                    child: orientation == Orientation.landscape
+                        ? FlipClockWidget(
+                            theme: clockTheme, // Pass the theme
+                          )
+                        : Text('Flip Portrait'));
+              }),
               // Global Button Overlay
               GlobalButtonOverlay(
                 buttons: [
                   CustomButton(
                     text: 'CALENDAR',
                     onPressed: () {
-                      Navigator.pushNamed(context, '/calendar');
+                      Navigator.pushReplacement(
+                        context,
+                        PageRouteBuilder(
+                          pageBuilder:
+                              (context, animation, secondaryAnimation) =>
+                                  const CalendarScreen(),
+                          transitionDuration:
+                              Duration(seconds: 0), // No transition
+                        ),
+                      );
                     },
                     isSelected: false,
                   ),
@@ -122,13 +140,17 @@ class FlipScreen extends StatelessWidget {
                   ),
                   CustomButton(
                     text: '12H',
-                    onPressed: () {},
-                    isSelected: false,
+                    onPressed: () {
+                      clockService.toggleTimeFormat();
+                    },
+                    isSelected: clockService.is12hSelected,
                   ),
                   CustomButton(
                     text: '24H',
-                    onPressed: () {},
-                    isSelected: false,
+                    onPressed: () {
+                      clockService.toggleTimeFormat();
+                    },
+                    isSelected: !clockService.is12hSelected,
                   ),
                   CustomButton(
                     text: '',
@@ -137,13 +159,24 @@ class FlipScreen extends StatelessWidget {
                   ),
                   CustomButton(
                     text: 'DATE',
-                    onPressed: () {},
-                    isSelected: false,
+                    onPressed: () {
+                      clockService.toggleDate();
+                    },
+                    isSelected: clockService.isDateSelected,
                   ),
                   CustomButton(
                     text: 'NORMAL',
                     onPressed: () {
-                      Navigator.pushNamed(context, '/main');
+                      Navigator.pushReplacement(
+                        context,
+                        PageRouteBuilder(
+                          pageBuilder:
+                              (context, animation, secondaryAnimation) =>
+                                  const ClockScreen(),
+                          transitionDuration:
+                              Duration(seconds: 0), // No transition
+                        ),
+                      );
                     },
                     isSelected: true,
                   ),

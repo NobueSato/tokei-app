@@ -20,32 +20,36 @@ class SmallClockWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final clockService = Provider.of<ClockService>(context);
+    bool isDebugging = false;
     bool isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
     // Get the screen height using MediaQuery
     double screenHeight = MediaQuery.of(context).size.height;
 
-    // int row1height = isLandscape
-    //     ? 2346 // 23.46% when it's landscape
-    //     : 4310; // 43.10% when it's portrait
-    // int row2height = isLandscape
-    //     ? 5334 // 5334% when it's landscape
-    //     : 1380; // 13.8% when it's portrait
-    // int row3Height = isLandscape
-    //     ? 1546 // 15.46% when it's landscape
-    //     : 4310; // 43.1% when it's portrait
-    // int row2Column1width = isLandscape
-    //     ? 0789 // 7.89% when it's landscape
-    //     : 0640; // 6.4% when it's portrait
-    // int row2Column2width = isLandscape
-    //     ? 0615 // 6.15% when it's landscape
-    //     : 1146; // 11.46% when it's portrait
-    // int row2Column3width = isLandscape
-    //     ? 7426 // 74.26% when it's landscape
-    //     : 5707; // 57.07% when it's portrait
-    // int row2Column4width = isLandscape
-    //     ? 1170 // 11.70% when it's landscape
-    //     : 2106; // 21.06% when it's portrait
+    int row1height = isLandscape
+        ? 2800 // 23.46% when it's landscape
+        : 0; // 43.10% when it's portrait
+    int row2height = isLandscape
+        ? 4200 // 5334% when it's landscape
+        : 8600; // 13.8% when it's portrait
+    int row3Height = isLandscape
+        ? 0900 // 15.46% when it's landscape
+        : 1400; // 43.1% when it's portrait
+    int row4Height = isLandscape
+        ? 2000 // 13.76% when it's landscape
+        : 0; // 43.1% when it's portrait
+    int row2Column1width = isLandscape
+        ? 1000 // 7.89% when it's landscape
+        : 0640; // 6.4% when it's portrait
+    int row2Column2width = isLandscape
+        ? 1200 // 6.15% when it's landscape
+        : 1146; // 11.46% when it's portrait
+    int row2Column3width = isLandscape
+        ? 7300 // 74.26% when it's landscape
+        : 5707; // 57.07% when it's portrait
+    int row2Column4width = isLandscape
+        ? 0500 // 11.70% when it's landscape
+        : 1506; // 21.06% when it's portrait
     int dateHeight = isLandscape
         ? 0774 // 12.67% when it's landscape
         : 0246; // 2.46% when it's portrait
@@ -57,28 +61,32 @@ class SmallClockWidget extends StatelessWidget {
       children: [
         // Row 1: Space above the clock
         Expanded(
-          flex: 2,
-          child: Container(color: Colors.pink),
+          flex: row1height,
+          child:
+              Container(color: isDebugging ? Colors.pink : Colors.transparent),
         ),
 
         // Row 2: Clock
         Expanded(
-          flex: 6,
+          flex: row2height,
           child: Row(
             children: [
-              // far left space row2Column1
+              // Row 2 Column1: far left space
               Flexible(
-                flex: 1,
-                child: Container(color: Colors.blue),
-              ),
-              // Space between AM/PM and clock
-              Expanded(
-                flex: 1, // 14.04% of the row's width
+                flex: row2Column1width,
                 child: Container(
-                  // color: Colors.blue,
+                    color: isDebugging ? Colors.amber : Colors.transparent),
+              ),
+              // Row 2 Column2: Space between AM/PM and clock
+              Expanded(
+                flex: row2Column2width, // 14.04% of the row's width
+                child: Container(
+                  color: isDebugging ? Colors.blue : Colors.transparent,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
+                    crossAxisAlignment: isLandscape
+                        ? CrossAxisAlignment.end
+                        : CrossAxisAlignment.center,
                     children: [
                       FittedBox(
                         fit: BoxFit.scaleDown,
@@ -99,8 +107,8 @@ class SmallClockWidget extends StatelessWidget {
                                       fontSize: amPmFontSize,
                                       fontWeight: FontWeight.w600,
                                       color: clockService.amPm == 'PM'
-                                          ? Colors.grey
-                                          : Colors.black,
+                                          ? Color(0xFF8F8F8F)
+                                          : Color(0xFF2F2F2F),
                                     ),
                                   ),
                                   // PM Text
@@ -110,8 +118,8 @@ class SmallClockWidget extends StatelessWidget {
                                       fontSize: amPmFontSize,
                                       fontWeight: FontWeight.w600,
                                       color: clockService.amPm == 'AM'
-                                          ? Colors.grey
-                                          : Colors.black,
+                                          ? Color(0xFF8F8F8F)
+                                          : Color(0xFF2F2F2F),
                                     ),
                                   ),
                                 ],
@@ -124,24 +132,28 @@ class SmallClockWidget extends StatelessWidget {
                   ),
                 ),
               ),
-              // Time Text
+              // Row 2 Column3: Time Text
               Expanded(
-                flex: 8,
+                flex: row2Column3width,
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     double availableWidth =
                         constraints.maxWidth; // Get the parent width
                     double availableHeight = constraints.maxHeight;
                     return Container(
-                      // color: const Color.fromARGB(255, 200, 173, 246),
+                      color: isDebugging
+                          ? const Color.fromARGB(255, 200, 173, 246)
+                          : Colors.transparent,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           // Hours
                           Container(
-                            // color: const Color.fromARGB(255, 182, 245, 215),
-                            width: availableWidth * 0.41,
+                            color: isDebugging
+                                ? const Color.fromARGB(255, 182, 245, 215)
+                                : Colors.transparent,
+                            width: availableWidth * 0.44,
                             alignment: Alignment.centerRight,
                             child: FittedBox(
                               fit: BoxFit.contain,
@@ -151,34 +163,36 @@ class SmallClockWidget extends StatelessWidget {
                                   fontSize: fontSize,
                                   fontWeight: FontWeight.w700,
                                   height: 1.0,
-                                  letterSpacing: isLandscape ? -1 : -5,
+                                  letterSpacing: isLandscape ? -1 : -3,
                                 ),
-                                textAlign: TextAlign.end,
                               ),
                             ),
                           ),
 
                           // Colon
                           Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               FittedBox(
                                 fit: BoxFit.scaleDown,
                                 child: Container(
+                                  color: isDebugging
+                                      ? Colors.deepOrange
+                                      : Colors.transparent,
                                   width: isLandscape
                                       ? availableWidth * 0.12
-                                      : availableWidth * 0.09,
-                                  height: availableHeight * 0.95,
+                                      : availableWidth * 0.08,
+                                  height: availableHeight,
                                   child: FittedBox(
                                     fit: BoxFit.scaleDown,
                                     child: Text(
                                       clockService.isColonVisible ? ':' : ' ',
+                                      textAlign: TextAlign.start,
                                       style: TextStyle(
-                                          fontSize: fontSize * 0.9,
+                                          fontSize: fontSize,
                                           fontWeight: FontWeight.w700,
-                                          color: Colors.black,
-                                          letterSpacing: isLandscape ? 1 : -1,
-                                          height: 1),
+                                          color: Color(0xFF2F2F2F),
+                                          letterSpacing: isLandscape ? 1 : -3,
+                                          height: 0.9),
                                       textHeightBehavior:
                                           const TextHeightBehavior(
                                         applyHeightToFirstAscent: true,
@@ -192,19 +206,19 @@ class SmallClockWidget extends StatelessWidget {
                           ),
                           // Minutes
                           Container(
-                            //color: Colors.blue,
-                            width: availableWidth * 0.41,
+                            color:
+                                isDebugging ? Colors.blue : Colors.transparent,
+                            width: availableWidth * 0.44,
                             alignment: Alignment.centerLeft,
                             child: FittedBox(
                               fit: BoxFit.contain,
                               child: Text(
                                 clockService.minutes,
-                                textAlign: TextAlign.start,
                                 style: TextStyle(
                                   fontSize: fontSize,
                                   fontWeight: FontWeight.w700,
                                   height: 1.0,
-                                  letterSpacing: isLandscape ? -1 : -5,
+                                  letterSpacing: isLandscape ? -1 : -3,
                                 ),
                               ),
                             ),
@@ -216,17 +230,20 @@ class SmallClockWidget extends StatelessWidget {
                 ),
               ),
               Expanded(
-                flex: 1,
-                child: Container(color: Colors.transparent),
+                flex: row2Column4width,
+                child: Container(
+                    color: isDebugging
+                        ? Colors.deepPurpleAccent
+                        : Colors.transparent),
               ),
             ],
           ),
         ),
         // Date Text
         Expanded(
-          flex: 2,
+          flex: row3Height,
           child: Container(
-            color: Colors.brown,
+            color: isDebugging ? Colors.brown : Colors.transparent,
             alignment: Alignment.center,
             child: clockService.isDateSelected
                 ? Text(
@@ -240,10 +257,13 @@ class SmallClockWidget extends StatelessWidget {
                 : null,
           ),
         ),
-        // Expanded(
-        //   flex: 1, // 15.47% of the parent's height
-        //   child: Container(color: Colors.lightGreenAccent),
-        // ),
+        // Row 4
+        Expanded(
+          flex: row4Height, // 15.47% of the parent's height
+          child: Container(
+              color:
+                  isDebugging ? Colors.lightGreenAccent : Colors.transparent),
+        ),
       ],
     );
   }
