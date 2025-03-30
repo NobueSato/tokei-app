@@ -244,19 +244,30 @@ class SmallClockWidget extends StatelessWidget {
           flex: row3Height,
           child: Container(
             color: isDebugging ? Colors.brown : Colors.transparent,
-            alignment: Alignment.center,
-            child: clockService.isDateSelected
-                ? Text(
-                    clockService.date,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: dateFontSize,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  )
-                : null,
+            child: Row(
+              children: [
+                SizedBox(
+                    width:
+                        MediaQuery.of(context).size.width * 0.22), // 36% space
+                Align(
+                  alignment: Alignment.centerLeft, // Align text to the left
+                  child: clockService.isDateSelected
+                      ? Text(
+                          clockService.date,
+                          textAlign:
+                              TextAlign.left, // Ensure text is left-aligned
+                          style: TextStyle(
+                            fontSize: dateFontSize,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        )
+                      : null,
+                ),
+              ],
+            ),
           ),
         ),
+
         // Row 4
         Expanded(
           flex: row4Height, // 15.47% of the parent's height

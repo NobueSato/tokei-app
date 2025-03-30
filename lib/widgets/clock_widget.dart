@@ -20,7 +20,7 @@ class ClockWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final clockService = Provider.of<ClockService>(context);
-    bool isDebugging = true;
+    bool isDebugging = false;
     bool isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
     // Get the screen height using MediaQuery
@@ -100,7 +100,9 @@ class ClockWidget extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: amPmFontSize,
                                 fontWeight: FontWeight.w600,
-                                backgroundColor: Colors.yellow,
+                                backgroundColor: isDebugging
+                                    ? Colors.yellow
+                                    : Colors.transparent,
                                 color: clockService.amPm == 'PM'
                                     ? Color(0xFF8F8F8F)
                                     : Color(0xFF2F2F2F),
@@ -116,7 +118,9 @@ class ClockWidget extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: amPmFontSize,
                                 fontWeight: FontWeight.w600,
-                                backgroundColor: Colors.yellow,
+                                backgroundColor: isDebugging
+                                    ? Colors.yellow
+                                    : Colors.transparent,
                                 color: clockService.amPm == 'AM'
                                     ? Color(0xFF8F8F8F)
                                     : Color(0xFF2F2F2F),
