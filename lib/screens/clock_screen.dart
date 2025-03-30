@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../widgets/clock_widget.dart';
+import '../widgets/analog_clock_widget.dart';
+import '../widgets/flip_clock_widget.dart';
+import '../services/clock_service.dart';
 
 class ClockScreen extends StatelessWidget {
   const ClockScreen({super.key});
@@ -13,7 +17,7 @@ class ClockScreen extends StatelessWidget {
     double amPmFontSize = isLandscape ? 22.0 : 16.0;
 
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -21,10 +25,28 @@ class ClockScreen extends StatelessWidget {
         ),
       ),
       child: Center(
-        child: ClockWidget(
-            fontSize: fontSize,
-            dateFontSize: dateFontSize,
-            amPmFontSize: amPmFontSize),
+        child: Selector<ClockService, (bool, bool)>(
+          selector: (_, clockService) => (
+            clockService.isAnalogSelected,
+            clockService.isFlipSelected,
+          ),
+          builder: (_, selectedClockMode, __) {
+            bool isAnalogSelected = selectedClockMode.$1;
+            bool isFlipSelected = selectedClockMode.$2;
+
+            if (isAnalogSelected) {
+              return const AnalogClockWidget();
+            } else if (isFlipSelected) {
+              return const FlipClockWidget();
+            } else {
+              return ClockWidget(
+                fontSize: fontSize,
+                dateFontSize: dateFontSize,
+                amPmFontSize: amPmFontSize,
+              );
+            }
+          },
+        ),
       ),
     );
   }

@@ -1,5 +1,7 @@
 import 'dart:async'; // Add this import for Timer
 import 'package:flutter/material.dart';
+import '../services/clock_settings_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ClockService extends ChangeNotifier {
   Timer? _timer;
@@ -12,6 +14,10 @@ class ClockService extends ChangeNotifier {
   bool _is12hSelected = true; // Default to 12H format
   bool _is24hSelected = false;
   bool _isDateSelected = false;
+  bool _isFlipSelected = false;
+  bool _isAnalogSelected = false;
+  bool _isSmallScreen = false;
+  int _clockModeNum = 0; // Default to basic clock mode
 
   // Getters for the properties
   String get hours => _hours;
@@ -21,10 +27,33 @@ class ClockService extends ChangeNotifier {
   bool get is12hSelected => _is12hSelected;
   bool get is24hSelected => _is24hSelected;
   bool get isDateSelected => _isDateSelected;
+  bool get isFlipSelected => _isFlipSelected;
+  bool get isAnalogSelected => _isAnalogSelected;
+  bool get isSmallScreen => _isSmallScreen;
+  int get clockModeNum => _clockModeNum;
 
   ClockService() {
     _updateTime();
     _startTimer(); // Start the timer to update time every second
+    _loadPreferences();
+  }
+
+  Future<void> _loadPreferences() async {
+    Map<String, bool> buttons =
+        await ClockSettingsStorage.loadSelectedButtons();
+    _is12hSelected = buttons['12h'] ?? true;
+    _is24hSelected = buttons['24h'] ?? false;
+    _isDateSelected = buttons['DATE'] ?? false;
+    _isFlipSelected = buttons['FLIP'] ?? false;
+    _isAnalogSelected = buttons['ANALOG'] ?? false;
+    _isSmallScreen = buttons['BASIC'] == true ? false : true;
+    setClockMode();
+    notifyListeners();
+  }
+
+  Future<void> _savePreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setBool('isDateSelected', _isDateSelected);
   }
 
   void _startTimer() {
@@ -34,14 +63,60 @@ class ClockService extends ChangeNotifier {
   }
 
   // Method to toggle between 12h and 24h format
-  void toggleTimeFormat() {
-    _is12hSelected = !_is12hSelected;
-    _is24hSelected = !_is24hSelected;
+  void toggleTimeFormat({int toggle = 0}) {
+    // if off is 0, toggle, if 1, turn off 12h, if 2, turn off 24h
+    if (toggle == 0) {
+      _is12hSelected = !_is12hSelected;
+      _is24hSelected = !_is24hSelected;
+    } else if (toggle == 1) {
+      _is12hSelected = false;
+      _is24hSelected = true;
+    } else {
+      _is12hSelected = true;
+      _is24hSelected = false;
+    }
     _updateTime(); // Update time immediately after format change
   }
 
   void toggleDate() {
     _isDateSelected = !_isDateSelected;
+    _savePreferences();
+    notifyListeners();
+  }
+
+  void toggleFlipClock() {
+    _isFlipSelected = !_isFlipSelected;
+    setClockMode();
+    notifyListeners();
+  }
+
+  void toggleAnalogClock({int toggle = 1}) {
+    // if off is 1, toggle, if 0, turn off
+    if (toggle == 1) {
+      _isAnalogSelected = !_isAnalogSelected;
+    } else {
+      _isAnalogSelected = false;
+    }
+    setClockMode();
+    print('Analog: $_isAnalogSelected');
+    notifyListeners();
+  }
+
+  void setClockMode() {
+    if (isAnalogSelected) {
+      _clockModeNum = 1; // Analog clock mode
+    } else if (isFlipSelected) {
+      _clockModeNum = 2; // Flip clock mode
+    } else {
+      _clockModeNum = 0; // Basic clock mode
+    }
+    print('Clock mode: $_clockModeNum');
+    notifyListeners();
+  }
+
+  void setSmallScreen(bool onOff) {
+    _isSmallScreen = onOff;
+    notifyListeners();
   }
 
   // Update time based on the selected format
@@ -77,13 +152,13 @@ class ClockService extends ChangeNotifier {
   String _getFormattedDate() {
     final DateTime now = DateTime.now();
     final weekday = [
-      'SUNDAY',
       'MONDAY',
       'TUESDAY',
       'WEDNESDAY',
       'THURSDAY',
       'FRIDAY',
-      'SATURDAY'
+      'SATURDAY',
+      'SUNDAY'
     ][now.weekday - 1];
     return '${now.year} - ${now.month.toString().padLeft(2, '0')} - ${now.day.toString().padLeft(2, '0')} $weekday';
   }

@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:provider/provider.dart';
-import 'package:tokei_app/screens/flip_screen.dart';
-import '../main.dart';
 import '../services/clock_service.dart';
 import '../widgets/small_clock_widget.dart';
-import '../widgets/custom_button.dart'; // Import your CustomButton file here
-import '../widgets/global_button_overlay.dart';
+import '../widgets/analog_clock_widget.dart';
+import '../widgets/flip_clock_widget.dart';
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
@@ -29,7 +27,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
     // Get screen width and height
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
-    final clockService = Provider.of<ClockService>(context);
+    bool isAnalogSelected = context.watch<ClockService>().isAnalogSelected;
+    bool isFlipSelected = context.watch<ClockService>().isFlipSelected;
 
     // Calculate dynamic height and width percentages
     double row1Height = isLandscape
@@ -56,9 +55,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
     double fontSize = isLandscape ? 100.0 : 80.0;
     double amPmFontSize = isLandscape ? 22.0 : 16.0;
     double dateFontSize = 14.0;
-    bool _isDateSelected = false;
-    bool _is12hSelected = true;
-    bool _is24hSelected = false;
 
     return Scaffold(
       body: Stack(children: [
@@ -96,10 +92,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               // 1st column
                               Container(
                                 width: column1Width,
-                                child: SmallClockWidget(
-                                    fontSize: fontSize,
-                                    dateFontSize: dateFontSize,
-                                    amPmFontSize: amPmFontSize),
+                                child: isAnalogSelected
+                                    ? AnalogClockWidget()
+                                    : isFlipSelected
+                                        ? FlipClockWidget()
+                                        : SmallClockWidget(
+                                            fontSize: fontSize,
+                                            dateFontSize: dateFontSize,
+                                            amPmFontSize: amPmFontSize),
                               ),
                               // 2nd column: Smaller Calendar
                               Container(
@@ -232,10 +232,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             height: row2Height,
                             color:
                                 isDebugging ? Colors.blue : Colors.transparent,
-                            child: SmallClockWidget(
-                                fontSize: fontSize,
-                                dateFontSize: dateFontSize,
-                                amPmFontSize: amPmFontSize)),
+                            child: isAnalogSelected
+                                ? AnalogClockWidget()
+                                : isFlipSelected
+                                    ? FlipClockWidget()
+                                    : SmallClockWidget(
+                                        fontSize: fontSize,
+                                        dateFontSize: dateFontSize,
+                                        amPmFontSize: amPmFontSize)),
                         // 3rd row
                         Container(
                           height: row3Height,
@@ -352,97 +356,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     ),
             );
           },
-        ),
-        GlobalButtonOverlay(
-          buttons: [
-            CustomButton(
-              text: 'CALENDAR',
-              onPressed: () {
-                Navigator.pushNamed(context, '/calendar');
-              },
-              isSelected: false,
-            ),
-            CustomButton(
-              text: 'WORLD CLOCK',
-              onPressed: () {},
-              isSelected: false,
-            ),
-            CustomButton(
-              text: 'STOPWATCH',
-              onPressed: () {},
-              isSelected: false,
-            ),
-            CustomButton(
-              text: 'TIMER',
-              onPressed: () {},
-              isSelected: false,
-            ),
-            CustomButton(
-              text: 'D',
-              onPressed: () {},
-              isSelected: false,
-            ),
-            CustomButton(
-              text: 'A',
-              onPressed: () {},
-              isSelected: false,
-            ),
-            CustomButton(
-              text: '12H',
-              onPressed: () {
-                clockService.toggleTimeFormat();
-              },
-              isSelected: clockService.is12hSelected,
-            ),
-            CustomButton(
-              text: '24H',
-              onPressed: () {
-                clockService.toggleTimeFormat();
-              },
-              isSelected: !clockService.is12hSelected,
-            ),
-            CustomButton(
-              text: '',
-              onPressed: () {},
-              isSelected: false,
-            ),
-            CustomButton(
-              text: 'DATE',
-              onPressed: () {
-                clockService.toggleDate();
-              },
-              isSelected: clockService.isDateSelected,
-            ),
-            CustomButton(
-              text: 'NORMAL',
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  PageRouteBuilder(
-                    pageBuilder: (context, animation, secondaryAnimation) =>
-                        const ClockScreen(),
-                    transitionDuration: Duration(seconds: 0), // No transition
-                  ),
-                );
-              },
-              isSelected: true,
-            ),
-            CustomButton(
-              text: 'FLIP',
-              onPressed: () {
-                //Navigator.pushNamed(context, '/flip');
-                Navigator.pushReplacement(
-                  context,
-                  PageRouteBuilder(
-                    pageBuilder: (context, animation, secondaryAnimation) =>
-                        const FlipScreen(),
-                    transitionDuration: Duration(seconds: 0), // No transition
-                  ),
-                );
-              },
-              isSelected: false,
-            ),
-          ],
         ),
       ]),
     );
