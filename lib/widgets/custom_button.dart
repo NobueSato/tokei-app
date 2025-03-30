@@ -22,7 +22,7 @@ class CustomButton extends StatelessWidget {
       return SizedBox.shrink(); // No button rendered
     }
 
-    // Otherwise, return the ElevatedButton
+    // Otherwise, return the TextButton
     return TextButton(
       onPressed: onPressed,
       style: TextButton.styleFrom(
