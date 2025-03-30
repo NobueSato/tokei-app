@@ -1,15 +1,13 @@
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'flip_clock_theme.dart';
+import 'package:provider/provider.dart';
+import '../services/clock_service.dart';
 import 'flip_panel_plus.dart';
 
 class FlipClockWidget extends StatefulWidget {
-  final ClockTheme theme;
-
   const FlipClockWidget({
     super.key,
-    required this.theme,
   });
 
   @override
@@ -20,15 +18,20 @@ class _FlipClockWidgetState extends State<FlipClockWidget>
     with TickerProviderStateMixin {
   late StreamController<int> _hoursController;
   late StreamController<int> _minutesController;
-  late DateTime _currentTime;
+  String _hours = '';
+  String _minutes = '';
   late Timer _timer;
+  late ClockService clockService;
+  bool isDebugging = false;
 
   @override
   void initState() {
     super.initState();
+    clockService = Provider.of<ClockService>(context, listen: false);
     _hoursController = StreamController<int>.broadcast();
     _minutesController = StreamController<int>.broadcast();
-    _currentTime = DateTime.now();
+    _hours = clockService.hours;
+    _minutes = clockService.minutes;
     _updateTime();
     _startTimer();
   }
@@ -42,18 +45,19 @@ class _FlipClockWidgetState extends State<FlipClockWidget>
   }
 
   void _updateTime() {
-    final newTime = DateTime.now();
-    final hourChanged = newTime.hour != _currentTime.hour;
-    _currentTime.minute;
-    // Check if the minute has changed
-    final minuteChanged = _currentTime.minute.compareTo(newTime.minute);
+    final hourChanged = clockService.hours != _hours;
+    final minuteChanged = clockService.minutes != _minutes;
+
+    // Add new values to the streams if there was a change
     if (hourChanged) {
-      _hoursController.add(newTime.hour);
+      _hoursController.add(int.parse(clockService.hours));
     }
-    if (minuteChanged == -1) {
-      _minutesController.add(newTime.minute);
+    if (minuteChanged) {
+      _minutesController.add(int.parse(clockService.minutes));
     }
-    _currentTime = newTime;
+
+    _hours = clockService.hours;
+    _minutes = clockService.minutes;
   }
 
   @override
@@ -67,20 +71,28 @@ class _FlipClockWidgetState extends State<FlipClockWidget>
   @override
   Widget build(BuildContext context) {
     double spaceInBetween = MediaQuery.of(context).size.width * 0.05;
+    final clockService = Provider.of<ClockService>(context);
     return SafeArea(
       child: LayoutBuilder(
         builder: (context, constraints) {
           final isPortrait = constraints.maxHeight > constraints.maxWidth;
           final baseSize = _calculateBaseSize(constraints, isPortrait);
 
-          return SingleChildScrollView(
-            child: Container(
-              decoration: widget.theme.backgroundColor,
-              child: isPortrait
-                  ? _buildPortraitLayout(baseSize, constraints)
-                  : _buildLandscapeLayout(
-                      baseSize, constraints, spaceInBetween),
+          return Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFFD3D5E0), Color(0xFFD7D9E5)],
+                stops: [0.045, 0.949],
+                transform: GradientRotation(
+                    11 * 3.14159 / 180), // Apply 11-degree rotation
+              ),
             ),
+            child: isPortrait
+                ? _buildPortraitLayout(clockService, baseSize, constraints)
+                : _buildLandscapeLayout(
+                    clockService, baseSize, constraints, spaceInBetween),
           );
         },
       ),
@@ -92,44 +104,195 @@ class _FlipClockWidgetState extends State<FlipClockWidget>
     final maxHeight = constraints.maxHeight;
 
     if (isPortrait) {
-      return math.min(maxWidth / 2.5, maxHeight / 8);
+      return math.min(maxWidth / 3, maxHeight / 10);
     } else {
       return math.min(maxWidth / 8, maxHeight / 2.5);
     }
   }
 
-  Widget _buildPortraitLayout(double baseSize, BoxConstraints constraints) {
+  Widget _buildPortraitLayout(
+      ClockService clockService, double baseSize, BoxConstraints constraints) {
     final spacing = baseSize * 0.25;
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Flexible(
-          child: _buildFlipUnit(
-              _hoursController.stream, baseSize, _currentTime.hour),
-        ),
-        SizedBox(height: spacing),
-        Flexible(
-          child: _buildFlipUnit(
-              _minutesController.stream, baseSize, _currentTime.minute),
-        ),
-      ],
+    return Container(
+      color: isDebugging ? Colors.pink : Colors.transparent,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
+            children: [
+              // Space before AM/PM
+              SizedBox(width: baseSize * 0.3), // Adjust this space as needed
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Container(
+                  color: isDebugging ? Colors.green : Colors.transparent,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // AM Text
+                      Container(
+                        color: isDebugging ? Colors.green : Colors.transparent,
+                        width: baseSize *
+                            0.6, // Adjust the width to match the space you need
+                        child: Text(
+                          clockService.is12hSelected ? 'AM' : '',
+                          style: TextStyle(
+                            fontSize: baseSize * 0.3,
+                            fontWeight: FontWeight.w600,
+                            backgroundColor: isDebugging
+                                ? Colors.yellow
+                                : Colors.transparent,
+                            color: clockService.amPm == 'PM'
+                                ? Color(0xFF8F8F8F)
+                                : Color(0xFF2F2F2F),
+                          ),
+                        ),
+                      ),
+                      // Space between AM/PM
+                      SizedBox(
+                          height:
+                              baseSize * 1.2), // Adjust this space as needed
+                      // PM Text
+                      Container(
+                        color: isDebugging ? Colors.amber : Colors.transparent,
+                        width: baseSize *
+                            0.6, // Same width as AM to keep space consistent
+                        child: Text(
+                          clockService.is12hSelected ? 'PM' : '',
+                          style: TextStyle(
+                            fontSize: baseSize * 0.3,
+                            fontWeight: FontWeight.w600,
+                            backgroundColor: isDebugging
+                                ? Colors.yellow
+                                : Colors.transparent,
+                            color: clockService.amPm == 'AM'
+                                ? Color(0xFF8F8F8F)
+                                : Color(0xFF2F2F2F),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              // Responsive Space
+              SizedBox(width: baseSize * 0.4), // Adjust proportionally
+              Column(
+                children: [
+                  Container(
+                    color: isDebugging ? Colors.red : Colors.transparent,
+                    child: _buildFlipUnit(
+                        _hoursController.stream, baseSize, int.parse(_hours)),
+                  ),
+                  SizedBox(height: spacing),
+                  Container(
+                    color: isDebugging ? Colors.blue : Colors.transparent,
+                    child: _buildFlipUnit(_minutesController.stream, baseSize,
+                        int.parse(_minutes)),
+                  ),
+                ],
+              ),
+              // Space after the minutes container
+              SizedBox(height: baseSize * 0.5), // Adjust this space as needed
+            ],
+          ),
+          Container(
+            height: baseSize * 0.5, // Reserve a fixed height for the date space
+            color: isDebugging ? Colors.orange : Colors.transparent,
+            child: clockService.isDateSelected
+                ? Center(
+                    child: Text(
+                      clockService.date, // Display the date from clockService
+                      style: TextStyle(
+                        fontSize: baseSize * 0.2, // Adjust font size as needed
+                        fontWeight: FontWeight.w400,
+                        color: Colors.black, // Adjust color as needed
+                      ),
+                    ),
+                  )
+                : null, // Keep the space reserved even when there's no date
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildLandscapeLayout(
-      double baseSize, BoxConstraints constraints, double spaceInBetween) {
+  Widget _buildLandscapeLayout(ClockService clockService, double baseSize,
+      BoxConstraints constraints, double spaceInBetween) {
     final availableWidth = constraints.maxWidth * 0.80;
     final unitWidth = availableWidth / 3.5;
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _buildFlipUnit(
-            _hoursController.stream, baseSize, _currentTime.hour, unitWidth),
-        _buildSeparator(spaceInBetween),
-        _buildFlipUnit(_minutesController.stream, baseSize, _currentTime.minute,
-            unitWidth),
-      ],
+    return Container(
+      color: isDebugging ? Colors.purple : Colors.transparent,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Container(
+                  color: isDebugging ? Colors.green : Colors.transparent,
+                  child: Column(
+                    children: [
+                      // AM Text
+                      Text(
+                        clockService.amPm == '' ? '' : 'AM',
+                        style: TextStyle(
+                          fontSize: baseSize * 0.2,
+                          fontWeight: FontWeight.w600,
+                          backgroundColor:
+                              isDebugging ? Colors.yellow : Colors.transparent,
+                          color: clockService.amPm == 'PM'
+                              ? Color(0xFF8F8F8F)
+                              : Color(0xFF2F2F2F),
+                        ),
+                      ),
+                      // Responsive Space
+                      SizedBox(height: baseSize * 0.8), // Adjust proportionally
+                      // PM Text
+                      Text(
+                        clockService.amPm == '' ? '' : 'PM',
+                        style: TextStyle(
+                          fontSize: baseSize * 0.2,
+                          fontWeight: FontWeight.w600,
+                          backgroundColor:
+                              isDebugging ? Colors.yellow : Colors.transparent,
+                          color: clockService.amPm == 'AM'
+                              ? Color(0xFF8F8F8F)
+                              : Color(0xFF2F2F2F),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              _buildFlipUnit(_hoursController.stream, baseSize,
+                  int.parse(_hours), unitWidth),
+              _buildSeparator(spaceInBetween),
+              _buildFlipUnit(_minutesController.stream, baseSize,
+                  int.parse(_minutes), unitWidth),
+            ],
+          ),
+          Container(
+            height: baseSize * 0.5, // Reserve a fixed height for the date space
+            color: isDebugging ? Colors.orange : Colors.transparent,
+            child: clockService.isDateSelected
+                ? Center(
+                    child: Text(
+                      clockService.date, // Display the date from clockService
+                      style: TextStyle(
+                        fontSize: baseSize * 0.2, // Adjust font size as needed
+                        fontWeight: FontWeight.w400,
+                        color: Colors.black, // Adjust color as needed
+                      ),
+                    ),
+                  )
+                : null, // Keep the space reserved even when there's no date
+          ),
+        ],
+      ),
     );
   }
 
@@ -152,12 +315,12 @@ class _FlipClockWidgetState extends State<FlipClockWidget>
   Widget _buildPairCard(int value, double baseSize) {
     return Container(
       decoration: BoxDecoration(
-          color: widget.theme.secondaryBackgroundColor,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(baseSize * 0.1)),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(baseSize * 0.1),
         child: CustomPaint(
-          painter: CardPainter(baseSize: baseSize, theme: widget.theme),
+          painter: CardPainter(baseSize: baseSize),
           child: Center(
             child: FittedBox(
               fit: BoxFit.contain,
@@ -166,13 +329,13 @@ class _FlipClockWidgetState extends State<FlipClockWidget>
                 child: Text(
                   value.toString().padLeft(2, '0'),
                   style: TextStyle(
-                    color: widget.theme.textColor,
+                    color: Colors.black,
                     fontSize: baseSize * 1.2,
                     fontWeight: FontWeight.bold,
                     shadows: [
                       Shadow(
                         blurRadius: 2.0,
-                        color: Colors.black.withOpacity(0.3),
+                        color: Color.fromRGBO(0, 0, 0, 0.5),
                         offset: const Offset(1.0, 1.0),
                       ),
                     ],
@@ -196,11 +359,9 @@ class _FlipClockWidgetState extends State<FlipClockWidget>
 
 class CardPainter extends CustomPainter {
   final double baseSize;
-  final ClockTheme theme;
 
   CardPainter({
     required this.baseSize,
-    required this.theme,
   });
 
   @override
@@ -209,11 +370,12 @@ class CardPainter extends CustomPainter {
     final rect = Rect.fromLTWH(0, 0, size.width, size.height);
 
     // Draw main background
-    paint.color = theme.secondaryBackgroundColor;
+    paint.color = Colors.white;
     canvas.drawRect(rect, paint);
 
     // Draw horizontal line
-    paint.color = theme.borderColor.withOpacity(0.5);
+    paint.color = Color.fromRGBO(0, 0, 0, 0.5);
+
     paint.strokeWidth = 1;
     canvas.drawLine(
       Offset(0, size.height / 2),
