@@ -6,8 +6,12 @@ import '../services/clock_service.dart';
 import 'flip_panel_plus.dart';
 
 class FlipClockWidget extends StatefulWidget {
+  final double dateFontSize;
+  final double amPmFontSize;
   const FlipClockWidget({
     super.key,
+    required this.dateFontSize,
+    required this.amPmFontSize,
   });
 
   @override
@@ -112,89 +116,103 @@ class _FlipClockWidgetState extends State<FlipClockWidget>
 
   Widget _buildPortraitLayout(
       ClockService clockService, double baseSize, BoxConstraints constraints) {
-    final spacing = baseSize * 0.25;
+    final spacing = baseSize * 0.45;
     return Container(
       color: isDebugging ? Colors.pink : Colors.transparent,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Row(
-            children: [
-              // Space before AM/PM
-              SizedBox(width: baseSize * 0.3), // Adjust this space as needed
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Container(
-                  color: isDebugging ? Colors.green : Colors.transparent,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // AM Text
-                      Container(
-                        color: isDebugging ? Colors.green : Colors.transparent,
-                        width: baseSize *
-                            0.6, // Adjust the width to match the space you need
-                        child: Text(
-                          clockService.is12hSelected ? 'AM' : '',
-                          style: TextStyle(
-                            fontSize: baseSize * 0.3,
-                            fontWeight: FontWeight.w600,
-                            backgroundColor: isDebugging
-                                ? Colors.yellow
+          Container(
+            color: isDebugging ? Colors.blue : Colors.transparent,
+            height: baseSize * 4.6,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Flexible(
+                  child: Container(
+                    color: isDebugging ? Colors.green : Colors.transparent,
+                    width: double.infinity, // ✅ Expands up to maxWidth
+                    height: constraints.maxHeight,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown, // ✅ Shrinks when screen is narrow
+                      child: Row(
+                        children: [
+                          // AM/PM Container
+                          Container(
+                            color: isDebugging
+                                ? Colors.orange
                                 : Colors.transparent,
-                            color: clockService.amPm == 'PM'
-                                ? Color(0xFF8F8F8F)
-                                : Color(0xFF2F2F2F),
+                            width: widget.amPmFontSize * 1.8,
+                            //alignment: Alignment.centerRight,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // AM Text
+                                Container(
+                                  color: isDebugging
+                                      ? Colors.green
+                                      : Colors.transparent,
+                                  child: Text(
+                                    clockService.is12hSelected ? 'AM' : '',
+                                    style: TextStyle(
+                                      fontSize: widget.amPmFontSize,
+                                      fontWeight: FontWeight.w600,
+                                      backgroundColor: isDebugging
+                                          ? Colors.yellow
+                                          : Colors.transparent,
+                                      color: clockService.amPm == 'PM'
+                                          ? Color(0xFF8F8F8F)
+                                          : Color(0xFF2F2F2F),
+                                    ),
+                                  ),
+                                ),
+                                // Space between AM/PM
+                                SizedBox(
+                                    height: baseSize *
+                                        0.7), // Adjust this space as needed
+                                // PM Text
+                                Container(
+                                  color: isDebugging
+                                      ? Colors.amber
+                                      : Colors.transparent,
+                                  child: Text(
+                                    clockService.is12hSelected ? 'PM' : '',
+                                    style: TextStyle(
+                                      fontSize: widget.amPmFontSize,
+                                      fontWeight: FontWeight.w600,
+                                      backgroundColor: isDebugging
+                                          ? Colors.yellow
+                                          : Colors.transparent,
+                                      color: clockService.amPm == 'AM'
+                                          ? Color(0xFF8F8F8F)
+                                          : Color(0xFF2F2F2F),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ),
-                      // Space between AM/PM
-                      SizedBox(
-                          height:
-                              baseSize * 1.2), // Adjust this space as needed
-                      // PM Text
-                      Container(
-                        color: isDebugging ? Colors.amber : Colors.transparent,
-                        width: baseSize *
-                            0.6, // Same width as AM to keep space consistent
-                        child: Text(
-                          clockService.is12hSelected ? 'PM' : '',
-                          style: TextStyle(
-                            fontSize: baseSize * 0.3,
-                            fontWeight: FontWeight.w600,
-                            backgroundColor: isDebugging
-                                ? Colors.yellow
-                                : Colors.transparent,
-                            color: clockService.amPm == 'AM'
-                                ? Color(0xFF8F8F8F)
-                                : Color(0xFF2F2F2F),
+                          SizedBox(
+                              width: spacing * 0.5), // Adjust proportionally
+                          Column(
+                            children: [
+                              _buildFlipUnit(_hoursController.stream, baseSize,
+                                  int.parse(_hours)),
+                              SizedBox(height: 5),
+                              _buildFlipUnit(_minutesController.stream,
+                                  baseSize, int.parse(_minutes)),
+                            ],
                           ),
-                        ),
+                          SizedBox(
+                              width: spacing * 1.5), // Adjust proportionally
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
-              // Responsive Space
-              SizedBox(width: baseSize * 0.4), // Adjust proportionally
-              Column(
-                children: [
-                  Container(
-                    color: isDebugging ? Colors.red : Colors.transparent,
-                    child: _buildFlipUnit(
-                        _hoursController.stream, baseSize, int.parse(_hours)),
-                  ),
-                  SizedBox(height: spacing),
-                  Container(
-                    color: isDebugging ? Colors.blue : Colors.transparent,
-                    child: _buildFlipUnit(_minutesController.stream, baseSize,
-                        int.parse(_minutes)),
-                  ),
-                ],
-              ),
-              // Space after the minutes container
-              SizedBox(height: baseSize * 0.5), // Adjust this space as needed
-            ],
+              ],
+            ),
           ),
           Container(
             height: baseSize * 0.5, // Reserve a fixed height for the date space
@@ -204,7 +222,8 @@ class _FlipClockWidgetState extends State<FlipClockWidget>
                     child: Text(
                       clockService.date, // Display the date from clockService
                       style: TextStyle(
-                        fontSize: baseSize * 0.2, // Adjust font size as needed
+                        fontSize:
+                            widget.dateFontSize, // Adjust font size as needed
                         fontWeight: FontWeight.w400,
                         color: Colors.black, // Adjust color as needed
                       ),
@@ -229,50 +248,64 @@ class _FlipClockWidgetState extends State<FlipClockWidget>
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               FittedBox(
                 fit: BoxFit.scaleDown,
-                child: Container(
-                  color: isDebugging ? Colors.green : Colors.transparent,
-                  child: Column(
-                    children: [
-                      // AM Text
-                      Text(
-                        clockService.amPm == '' ? '' : 'AM',
-                        style: TextStyle(
-                          fontSize: baseSize * 0.2,
-                          fontWeight: FontWeight.w600,
-                          backgroundColor:
-                              isDebugging ? Colors.yellow : Colors.transparent,
-                          color: clockService.amPm == 'PM'
-                              ? Color(0xFF8F8F8F)
-                              : Color(0xFF2F2F2F),
-                        ),
-                      ),
-                      // Responsive Space
-                      SizedBox(height: baseSize * 0.8), // Adjust proportionally
-                      // PM Text
-                      Text(
-                        clockService.amPm == '' ? '' : 'PM',
-                        style: TextStyle(
-                          fontSize: baseSize * 0.2,
-                          fontWeight: FontWeight.w600,
-                          backgroundColor:
-                              isDebugging ? Colors.yellow : Colors.transparent,
-                          color: clockService.amPm == 'AM'
-                              ? Color(0xFF8F8F8F)
-                              : Color(0xFF2F2F2F),
-                        ),
-                      ),
-                    ],
+                child: SizedBox(
+                  width: baseSize * 0.38, // Ensure consistent width
+                  child: Container(
+                    color: isDebugging ? Colors.green : Colors.transparent,
+                    child: clockService.is12hSelected
+                        ? Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // AM Text
+                              Text(
+                                clockService.amPm == '' ? '' : 'AM',
+                                style: TextStyle(
+                                  fontSize: widget.amPmFontSize,
+                                  fontWeight: FontWeight.w600,
+                                  backgroundColor: isDebugging
+                                      ? Colors.yellow
+                                      : Colors.transparent,
+                                  color: clockService.amPm == 'PM'
+                                      ? Color(0xFF8F8F8F)
+                                      : Color(0xFF2F2F2F),
+                                ),
+                              ),
+                              SizedBox(
+                                  height:
+                                      baseSize * 0.5), // Adjust proportionally
+                              // PM Text
+                              Text(
+                                clockService.amPm == '' ? '' : 'PM',
+                                style: TextStyle(
+                                  fontSize: widget.amPmFontSize,
+                                  fontWeight: FontWeight.w600,
+                                  backgroundColor: isDebugging
+                                      ? Colors.yellow
+                                      : Colors.transparent,
+                                  color: clockService.amPm == 'AM'
+                                      ? Color(0xFF8F8F8F)
+                                      : Color(0xFF2F2F2F),
+                                ),
+                              ),
+                            ],
+                          )
+                        : SizedBox.shrink(), // Keep width consistent
                   ),
                 ),
               ),
+
+              // Responsive Space
+              SizedBox(width: baseSize * 0.2), // Adjust proportionally
               _buildFlipUnit(_hoursController.stream, baseSize,
                   int.parse(_hours), unitWidth),
               _buildSeparator(spaceInBetween),
               _buildFlipUnit(_minutesController.stream, baseSize,
                   int.parse(_minutes), unitWidth),
+              SizedBox(width: baseSize * 0.54), // Adjust proportionally
             ],
           ),
           Container(
@@ -283,7 +316,8 @@ class _FlipClockWidgetState extends State<FlipClockWidget>
                     child: Text(
                       clockService.date, // Display the date from clockService
                       style: TextStyle(
-                        fontSize: baseSize * 0.2, // Adjust font size as needed
+                        fontSize:
+                            widget.dateFontSize, // Adjust font size as needed
                         fontWeight: FontWeight.w400,
                         color: Colors.black, // Adjust color as needed
                       ),
@@ -298,9 +332,11 @@ class _FlipClockWidgetState extends State<FlipClockWidget>
 
   Widget _buildFlipUnit(Stream<int> stream, double baseSize, int initialValue,
       [double? width]) {
+    double panelWidth = baseSize * 2.2;
+    double panelHeight = baseSize * 2;
     return SizedBox(
-      width: width ?? baseSize * 2.2,
-      height: baseSize * 2,
+      width: panelWidth,
+      height: panelHeight,
       child: FlipPanelPlus<int>.stream(
         itemStream: stream,
         itemBuilder: (context, value) => _buildPairCard(value, baseSize),

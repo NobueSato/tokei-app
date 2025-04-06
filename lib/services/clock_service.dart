@@ -16,7 +16,6 @@ class ClockService extends ChangeNotifier {
   bool _isDateSelected = false;
   bool _isFlipSelected = false;
   bool _isAnalogSelected = false;
-  bool _isSmallScreen = false;
   int _clockModeNum = 0; // Default to basic clock mode
 
   // Getters for the properties
@@ -29,7 +28,6 @@ class ClockService extends ChangeNotifier {
   bool get isDateSelected => _isDateSelected;
   bool get isFlipSelected => _isFlipSelected;
   bool get isAnalogSelected => _isAnalogSelected;
-  bool get isSmallScreen => _isSmallScreen;
   int get clockModeNum => _clockModeNum;
 
   ClockService() {
@@ -46,7 +44,6 @@ class ClockService extends ChangeNotifier {
     _isDateSelected = buttons['DATE'] ?? false;
     _isFlipSelected = buttons['FLIP'] ?? false;
     _isAnalogSelected = buttons['ANALOG'] ?? false;
-    _isSmallScreen = buttons['BASIC'] == true ? false : true;
     setClockMode();
     notifyListeners();
   }
@@ -111,11 +108,6 @@ class ClockService extends ChangeNotifier {
       _clockModeNum = 0; // Basic clock mode
     }
     print('Clock mode: $_clockModeNum');
-    notifyListeners();
-  }
-
-  void setSmallScreen(bool onOff) {
-    _isSmallScreen = onOff;
     notifyListeners();
   }
 

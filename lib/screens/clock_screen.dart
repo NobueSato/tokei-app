@@ -13,8 +13,9 @@ class ClockScreen extends StatelessWidget {
     bool isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
     double fontSize = isLandscape ? 220.0 : 80.0;
-    double dateFontSize = isLandscape ? 20.0 : 14.0;
+    double dateFontSize = isLandscape ? 20.0 : 16.0;
     double amPmFontSize = isLandscape ? 22.0 : 16.0;
+    double flipAmPmFontSize = 22.0;
 
     return Container(
       decoration: const BoxDecoration(
@@ -35,9 +36,14 @@ class ClockScreen extends StatelessWidget {
             bool isFlipSelected = selectedClockMode.$2;
 
             if (isAnalogSelected) {
-              return const AnalogClockWidget();
+              return AnalogClockWidget(
+                dateFontSize: dateFontSize,
+              );
             } else if (isFlipSelected) {
-              return const FlipClockWidget();
+              return FlipClockWidget(
+                dateFontSize: dateFontSize,
+                amPmFontSize: flipAmPmFontSize,
+              );
             } else {
               return ClockWidget(
                 fontSize: fontSize,

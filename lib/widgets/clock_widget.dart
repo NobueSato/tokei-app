@@ -49,7 +49,7 @@ class ClockWidget extends StatelessWidget {
         : 1604; // 7.28% when it's portrait
     int dateHeight = isLandscape
         ? 0774 // 12.67% when it's landscape
-        : 0246; // 2.46% when it's portrait
+        : 0260; // 2.46% when it's portrait
     double amPmHeight = isLandscape
         ? screenHeight * 0.2453 // 24.53 when it's landscape
         : screenHeight * 0.0738; // 7.38% when it's portrait
