@@ -24,6 +24,7 @@ class CustomAnalogClockWidget extends StatefulWidget {
   final TickMode tickMode;
   final bool showTime;
   final bool showDate;
+  final bool isDebugging;
 
   const CustomAnalogClockWidget({
     Key? key,
@@ -39,6 +40,7 @@ class CustomAnalogClockWidget extends StatefulWidget {
     required this.tickMode,
     this.showTime = true,
     this.showDate = true,
+    this.isDebugging = false,
   }) : super(key: key);
 
   @override
@@ -71,21 +73,24 @@ class _CustomAnalogClockWidgetState extends State<CustomAnalogClockWidget> {
     return Stack(
       alignment: Alignment.center,
       children: [
-        SizedBox(
-          width: widget.clockSize,
-          height: widget.clockSize,
-          child: CustomPaint(
-            painter: ClockPainter(
-              hourHandLength: widget.hourHandLength,
-              minuteHandLength: widget.minuteHandLength,
-              secondHandLength: widget.secondHandLength,
-              hourHandColor: widget.hourHandColor,
-              minuteHandColor: widget.minuteHandColor,
-              secondHandColor: widget.secondHandColor,
-              tickColor: widget.tickColor,
-              numberColor: widget.numberColor,
-              tickMode: widget.tickMode,
-              currentTime: _currentTime,
+        Container(
+          color: widget.isDebugging ? Colors.red : Colors.transparent,
+          child: SizedBox(
+            width: widget.clockSize,
+            height: widget.clockSize,
+            child: CustomPaint(
+              painter: ClockPainter(
+                hourHandLength: widget.hourHandLength,
+                minuteHandLength: widget.minuteHandLength,
+                secondHandLength: widget.secondHandLength,
+                hourHandColor: widget.hourHandColor,
+                minuteHandColor: widget.minuteHandColor,
+                secondHandColor: widget.secondHandColor,
+                tickColor: widget.tickColor,
+                numberColor: widget.numberColor,
+                tickMode: widget.tickMode,
+                currentTime: _currentTime,
+              ),
             ),
           ),
         ),
@@ -100,7 +105,7 @@ class _CustomAnalogClockWidgetState extends State<CustomAnalogClockWidget> {
                     _formatTime(_currentTime), // Digital Time
                     style: TextStyle(
                         fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w400,
                         color: widget.numberColor),
                   ),
                 if (widget.showTime) SizedBox(height: 5),
@@ -126,13 +131,13 @@ class _CustomAnalogClockWidgetState extends State<CustomAnalogClockWidget> {
 
   String _getWeekday(int weekday) {
     return [
-      "SUNDAY",
       "MONDAY",
       "TUEDAY",
       "WEDNESDAY",
       "THURSDAY",
       "FRIDAY",
-      "SATURDAY"
+      "SATURDAY",
+      "SUNDAY"
     ][weekday - 1];
   }
 
@@ -279,7 +284,6 @@ class ClockPainter extends CustomPainter {
         break;
 
       case TickMode.none:
-      default:
         tickPositions = [];
         numbersToShow = [];
         break;
