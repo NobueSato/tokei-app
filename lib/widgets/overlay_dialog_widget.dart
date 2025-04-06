@@ -183,9 +183,6 @@ class _OverlayDialogWidgetState extends State<OverlayDialogWidget> {
               print(selectedButtons);
             }
           }
-          if (_selectedScreen > 0) {
-            clockService.setSmallScreen(true);
-          }
         } // If the button is already selected, do nothing
       } else if (timeModeButtons.contains(button)) {
         // Check if the button is either 12h or 24h
@@ -218,23 +215,18 @@ class _OverlayDialogWidgetState extends State<OverlayDialogWidget> {
           switch (button) {
             case 'BASIC':
               _selectedScreen = 0;
-              clockService.setSmallScreen(false);
               break;
             case 'CALENDAR':
               _selectedScreen = 1;
-              clockService.setSmallScreen(true);
               break;
             case 'WORLD CLOCK':
               _selectedScreen = 2;
-              clockService.setSmallScreen(true);
               break;
             case 'STOPWATCH':
               _selectedScreen = 3;
-              clockService.setSmallScreen(true);
               break;
             case 'TIMER':
               _selectedScreen = 4;
-              clockService.setSmallScreen(true); // Confirm if this is correct
               break;
             default:
               break;
