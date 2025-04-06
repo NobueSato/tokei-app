@@ -20,39 +20,36 @@ class SmallClockWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final clockService = Provider.of<ClockService>(context);
-    bool isDebugging = false;
+    bool isDebugging = true;
     bool isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
     // Get the screen height using MediaQuery
     double screenHeight = MediaQuery.of(context).size.height;
 
     int row1height = isLandscape
-        ? 2800 // 23.46% when it's landscape
+        ? 3100 // 23.46% when it's landscape
         : 0; // 43.10% when it's portrait
     int row2height = isLandscape
-        ? 4200 // 5334% when it's landscape
+        ? 3500 // 4200% when it's landscape
         : 8600; // 13.8% when it's portrait
     int row3Height = isLandscape
-        ? 0900 // 15.46% when it's landscape
+        ? 0800 // 9% when it's landscape
         : 1400; // 43.1% when it's portrait
     int row4Height = isLandscape
-        ? 2000 // 13.76% when it's landscape
+        ? 2600 // 13.76% when it's landscape
         : 0; // 43.1% when it's portrait
     int row2Column1width = isLandscape
-        ? 1000 // 7.89% when it's landscape
+        ? 0800 // 8% when it's landscape
         : 0640; // 6.4% when it's portrait
     int row2Column2width = isLandscape
-        ? 1200 // 6.15% when it's landscape
+        ? 1000 // 10% when it's landscape
         : 1146; // 11.46% when it's portrait
     int row2Column3width = isLandscape
-        ? 7300 // 74.26% when it's landscape
+        ? 7300 // 73% when it's landscape
         : 5707; // 57.07% when it's portrait
     int row2Column4width = isLandscape
-        ? 0500 // 11.70% when it's landscape
+        ? 0900 // 10% when it's landscape
         : 1506; // 21.06% when it's portrait
-    int dateHeight = isLandscape
-        ? 0774 // 12.67% when it's landscape
-        : 0246; // 2.46% when it's portrait
     double amPmHeight = isLandscape
         ? screenHeight * 0.2453 // 24.53 when it's landscape
         : screenHeight * 0.0738; // 7.38% when it's portrait
@@ -245,23 +242,24 @@ class SmallClockWidget extends StatelessWidget {
           child: Container(
             color: isDebugging ? Colors.brown : Colors.transparent,
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(
-                    width:
-                        MediaQuery.of(context).size.width * 0.22), // 36% space
-                Align(
-                  alignment: Alignment.centerLeft, // Align text to the left
-                  child: clockService.isDateSelected
-                      ? Text(
-                          clockService.date,
-                          textAlign:
-                              TextAlign.left, // Ensure text is left-aligned
-                          style: TextStyle(
-                            fontSize: dateFontSize,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        )
-                      : null,
+                Container(
+                  color: isDebugging ? Colors.amber : Colors.transparent,
+                  child: Align(
+                    alignment: Alignment.centerLeft, // Align text to the left
+                    child: clockService.isDateSelected
+                        ? Text(
+                            clockService.date,
+                            textAlign:
+                                TextAlign.left, // Ensure text is left-aligned
+                            style: TextStyle(
+                              fontSize: dateFontSize,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          )
+                        : null,
+                  ),
                 ),
               ],
             ),
