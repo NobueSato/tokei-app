@@ -20,7 +20,7 @@ class SmallClockWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final clockService = Provider.of<ClockService>(context);
-    bool isDebugging = true;
+    bool isDebugging = false;
     bool isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
     // Get the screen height using MediaQuery

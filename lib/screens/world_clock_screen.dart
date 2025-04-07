@@ -93,7 +93,7 @@ class _WorldClockScreenState extends State<WorldClockScreen> {
 
   @override
   Widget build(BuildContext context) {
-    bool isDebugging = true;
+    bool isDebugging = false;
     // Detect orientation
     bool isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
@@ -181,12 +181,18 @@ class _WorldClockScreenState extends State<WorldClockScreen> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
+                              SizedBox(
+                                height: row3Height * 0.8,
+                              ),
                               Container(
-                                color: Colors.green,
+                                color: isDebugging
+                                    ? Colors.green
+                                    : Colors.transparent,
                                 child: Text(
                                   getWorldTime(timeZones[selectedCountry]!),
                                   style: TextStyle(
                                     fontSize: fontSize * 0.4,
+                                    height: fontSize * 0.005,
                                     fontWeight: FontWeight.w400,
                                   ),
                                 ),
@@ -229,7 +235,7 @@ class _WorldClockScreenState extends State<WorldClockScreen> {
                 // Row 3
                 Container(
                   height: row3Height,
-                  color: isDebugging ? Colors.amberAccent : Colors.transparent,
+                  color: isDebugging ? Colors.orange : Colors.transparent,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
