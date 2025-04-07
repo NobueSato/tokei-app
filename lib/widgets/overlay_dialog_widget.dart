@@ -194,9 +194,11 @@ class _OverlayDialogWidgetState extends State<OverlayDialogWidget> {
         } else {
           // Digital clock style
           // If the button is not selected, deselect the other button
-          selectedButtons[button] = true;
-          selectedButtons[button == '12h' ? '24h' : '12h'] = false;
-          clockService.toggleTimeFormat();
+          if (selectedButtons[button] == false) {
+            selectedButtons[button] = true;
+            selectedButtons[button == '12h' ? '24h' : '12h'] = false;
+            clockService.toggleTimeFormat();
+          }
         }
       } else if (dateButton.contains(button)) {
         // Check if the button is DATE
@@ -364,11 +366,22 @@ class _OverlayDialogWidgetState extends State<OverlayDialogWidget> {
   }
 
   Widget _buildColumn(List<String> buttons, double width) {
+    Color backgroundColor;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: buttons.map((text) {
         if (text.isEmpty) return SizedBox.shrink();
+        if (clockService.isAnalogSelected &&
+            (text == '12h' || text == '24h' || text == 'FLIP')) {
+          // Disable 12h/24h and FLIP buttons when Analog is selected
+          backgroundColor = const Color.fromARGB(184, 56, 56, 59);
+        } else {
+          backgroundColor = selectedButtons[text]!
+              ? const Color.fromARGB(185, 188, 188, 205)
+              : const Color.fromARGB(180, 255, 255, 255);
+        }
         return Padding(
           padding: const EdgeInsets.only(bottom: 10),
           child: ClipRRect(
@@ -376,9 +389,7 @@ class _OverlayDialogWidgetState extends State<OverlayDialogWidget> {
             child: ElevatedButton(
               onPressed: () => toggleSelection(text),
               style: ElevatedButton.styleFrom(
-                backgroundColor: selectedButtons[text]!
-                    ? const Color.fromARGB(185, 188, 188, 205)
-                    : const Color.fromARGB(180, 255, 255, 255),
+                backgroundColor: backgroundColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
